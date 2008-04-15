@@ -1,0 +1,12 @@
+#
+# To enable neat URLs, mod_rewrite must be enabled. Once you have confirmed that
+# mod_rewrite can be used, uncomment the following lines. Also, if your project
+# is not the web root, modify RewriteBase accordingly. E.g. if the base URL of 
+# your project is http://www.domain.com/~user/, use "/~user/" (without the double
+# quotes) as your RewriteBase.
+#
+
+#RewriteEngine on
+#RewriteBase /
+#RewriteCond %{REQUEST_URI} !index\.php
+#RewriteRule ^(.*)$ index.php?$1 [PT,L]
