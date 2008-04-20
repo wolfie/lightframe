@@ -275,17 +275,33 @@ class TOM {
 		
 		// parse arguments into an array
 		if ($args !== '') {
+			
+			/*
+			 * Replace each quoted (thus possibly spaced) argument with a unique
+			 * identifier (microtime + some id), remember the translations, and finally
+			 * apply them back to the actual values.
+			 */
+			
+			preg_match_all('/ ?(.+:)?(?<val>".+")/U', $args, $matches);
+			
+			$dict = array();
+			foreach ($matches['val'] as $value) {
+				$dict['"'.microtime(true).uniqid(true).'"'] = $value;
+			}
+			
+			$args = str_replace($dict, array_flip($dict), $args);
+
 			foreach (explode(' ', trim($args)) as $i => $arg) {
 				$temp = explode(':', $arg, 2);
 				$argname = $temp[0];
 				$argvalue = isset($temp[1]) ? $temp[1] : true;
 				
 				if ($argvalue !== true) {
-					$arguments[$argname] = $argvalue;
-					$arguments[$i] = $argvalue;
+					$arguments[$argname] = isset($dict[$argvalue]) ? $dict[$argvalue] : $argvalue;
+					$arguments[$i] = $arguments[$argname];
 				}
 				else {
-					$arguments[$i] = $argname;
+					$arguments[$i] = isset($dict[$argname]) ? $dict[$argname] : $argname;
 				}
 			}
 		}
