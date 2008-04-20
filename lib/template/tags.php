@@ -28,6 +28,14 @@ class LowercaseTag extends TOM {
 	}
 }
 
+class UppercaseTag extends TOM {
+	function evaluate() {
+		$this->expectsNodes();
+		parent::evaluate();
+		$this->result = strtoupper($this->result);
+	}
+}
+
 class TransformTag extends TOM {
 	function evaluate() {
 		$this->expectsNodes();
