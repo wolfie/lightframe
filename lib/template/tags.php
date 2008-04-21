@@ -53,11 +53,47 @@ class IfTag extends TOM {
 	function evaluate() {
 		$eval = null;
 		$var = $this->evaluateVariable(current($this->args));
+		$a = &$this->args;
 
 		switch (key($this->args)) {
-			case 'istrue': $eval = ($var === true); break;
-			case 'isfalse': $eval = ($var === false); break;
-			case 'equals': $eval = ($var == $this->evaluateVariable($this->args['to'])); break;
+			case 'istrue': 
+				$eval = ($var === true); 
+				break;
+				
+			case 'isfalse': 
+				$eval = ($var === false); 
+				break;
+				
+			case 'equals': 
+				$eval = ($var == $this->evaluateVariable($a['to'])); 
+				break;
+				
+			case 'notequals':
+				$eval = ($var != $this->evaluateVariable($a['to']));
+				break;
+				
+			case 'isgreater': 
+				if (isset($a[2]) && $a[2] == 'orequals') {
+					$eval = ($var >= $this->evaluateVariable($a['than']));
+				}
+				else {
+					$eval = ($var > $this->evaluateVariable($a['than']));
+				}
+				break;
+				
+			case 'isless': 
+				if (isset($a[2]) && $a[2] == 'orequals') {
+					$eval = ($var <= $this->evaluateVariable($a['than']));
+				}
+				else {
+					$eval = ($var < $this->evaluateVariable($a['than']));
+				}
+				break;
+				
+			case 'exists': 
+				$eval = ((string)$var != ''); 
+				break;
+			
 			default: die('invalid comparison method');
 		}
 		
