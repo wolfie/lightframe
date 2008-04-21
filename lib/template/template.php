@@ -479,25 +479,30 @@ class TOM {
 			 * array contains a model, or a model contains an array.
 			 */
 			
-			if (is_array($result)) {
-				foreach ($parts as $part) {
-					if (isset($result[$part])) {
-						$result = &$result[$part];
-					}
-					else {
-						$result = null;
-						break;
-					}
+			foreach ($parts as $part) {
+				if (is_array($result) && isset($result[$part])) {
+					$result = &$result[$part];
 				}
-			}
-			elseif (($result instanceof Model) ||Ê($result instanceof Entries)) {
-				foreach ($parts as $part) {
+				elseif (is_object($result)) {
+					$temp = null;
 					try {
-						$result = &$result->$part;
+						$temp = &$result->$part(); // try calling a method
 					}
 					catch (Exception $e) {
-						$result = &$result->$part();
+						try {
+							$temp = &$result->$part; // try calling a property
+						}
+						catch (Exception $e) {
+							$result = null;
+							break; // no such method/property, break the loop
+						}
 					}
+					
+					$result = $temp;
+				}
+				else {
+					$result = null;
+					break; // no hit, break the loop
 				}
 			}
 		}
