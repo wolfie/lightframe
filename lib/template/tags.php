@@ -57,6 +57,7 @@ class IfTag extends TOM {
 		switch (key($this->args)) {
 			case 'istrue': $eval = ($var === true); break;
 			case 'isfalse': $eval = ($var === false); break;
+			case 'equals': $eval = ($var == $this->evaluateVariable($this->args['to'])); break;
 			default: die('invalid comparison method');
 		}
 		
