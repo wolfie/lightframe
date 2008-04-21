@@ -439,8 +439,8 @@ class TOM {
 		}
 
 		// it's a quoted string
-		elseif (($result{0} === '\'' && $var{(strlen($result)-1)} === '\'') ||
-		        ($result{0} === '"'  && $var{(strlen($result)-1)} === '"')) {
+		elseif (($result{0} === '\'' && $result{(strlen($result)-1)} === '\'') ||
+		        ($result{0} === '"'  && $result{(strlen($result)-1)} === '"')) {
 			$result = substr($result, 1, -1);
 		}
 		
