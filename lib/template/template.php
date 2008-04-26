@@ -46,6 +46,9 @@ class Template {
 		if (strpos($this->templateFile, '..') !== false) {
 			trigger_error('Template filename cannot contain ".."');
 		}
+		if ($this->templateFile{0} === '/') {
+			trigger_error('Template filename cannot start with "/"');
+		}
 		
 		// the template is built in. Those templates know what they are doing
 		if ($this->builtin) {
@@ -331,7 +334,7 @@ class TOM {
 	 */
 	final protected function step() {
 		// there are no nodes left, return false
-		if (count($this->nodes) === 0) {
+		if (count($this->nodes) === 0 || is_string($this->nodes)) {
 			return false;
 		}
 
