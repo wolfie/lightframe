@@ -19,6 +19,7 @@
 
 define ('LF_SQL_RDBMS', ''); // pgsql, mysql, sqlite
 define ('LF_SQL_HOST', 'localhost'); // server or file to SQL location
+define ('LF_SQL_DBNAME', ''); // database name, leave blank for sqlite.
 define ('LF_SQL_USER', ''); // leave blank for sqlite
 define ('LF_SQL_PASS', ''); // leave blank for sqlite
 
