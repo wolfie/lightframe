@@ -162,7 +162,8 @@ class ForeachTag extends TOM {
 			$f[$as] = $this->next($f['_foreach'][$as]);
 		}
 		
-		unset($f[$as], $f['_foreach'][$as]); // to preserve memory
+		 // to preserve memory
+		unset($f[$as], $f['_foreach'][$as]);
 		if (count($f['_foreach']) === 0) {
 			unset($f['_foreach']);
 		}
@@ -170,6 +171,9 @@ class ForeachTag extends TOM {
 	
 	function current(&$var) {
 		if (is_object($var)) {
+			if ($var->count() === 0) {
+				return null;
+			}
 			return $var->current();
 		}
 		else {
