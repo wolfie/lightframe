@@ -1,4 +1,9 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
+
 require_once('tags.php');
 require_once('filters.php');
 
@@ -357,7 +362,8 @@ class TOM {
 		
 		// the node is a tag
 		elseif (strpos($node, '{% ') !== false) {
-			return $this->evaluateTag($node);
+			$return = $this->evaluateTag($node);
+			return $return;
 		}
 		else {
 			return $node;
@@ -365,7 +371,7 @@ class TOM {
 	}
 	
 	/**
-	 * Seek for a ending pair. If there is none, it's a
+	 * Seek for an ending pair. If there is none, it's a
 	 * simple tag, and is processed along with the arguments. Otherwise it's
 	 * a block tag, and everything between beginning and end tags is sent to the
 	 * tag for processing
@@ -384,7 +390,7 @@ class TOM {
 		$arguments = array();
 		$nests = 0;
 		
-
+		// try to seek the end pair.
 		foreach ($this->nodes as $n) {
 			if (strpos($n, '{% '.$tag) === 0) {
 				$nests++;
@@ -398,22 +404,25 @@ class TOM {
 			}
 			$tempNodes[] = $n;
 		}
-
+		
 		$anCount = count($argNodes);
 		
 		// No endtag found, it's a simple tag
 		if ($anCount === 0) {
 			$argNodes = $node;
 		}
+		
 		// it's a block - scroll over it
 		else {
-			for ($i=0; $i<=$anCount; $i++) {
+			for ($i=0; $i <= $anCount; $i++) {
 				array_shift($this->nodes);
 			}
 		}
+
 		
 		$class = ucfirst($tag).'Tag';
 		if (!class_exists($class, false)) {
+			//var_dump($this->nodes);die();
 			trigger_error($tag.' is not a valid tag');
 		}
 
@@ -455,45 +464,39 @@ class TOM {
 		// multipart
 		elseif (count($parts = explode('.', $result)) > 1) {
 			$result = array_shift($parts);
-			
 			// hard code some superglobals
 			if ($result === 'GET') {
-				$result = &$_GET;
+				$result = $_GET;
 			}
 			elseif ($result === 'POST') {
-				$result = &$_POST;
+				$result = $_POST;
 			}
 			elseif ($result === 'SESSION') {
-				$result = &$_SESSION;
+				$result = $_SESSION;
 			}
 			elseif ($result === 'ENV') {
-				$result = &$GLOBALS['env'];
+				$result = $GLOBALS['env'];
 			}
 			elseif (isset($this->context[$result])) {
-				$result = &$this->context[$result];
+				$result = $this->context[$result];
 			}
 			else {
 				$result = null;
 			}
 			
 			
-			/*
-			 * TODO: this needs to be looped differently - it doesn't work e.g. if an 
-			 * array contains a model, or a model contains an array.
-			 */
-			
 			foreach ($parts as $part) {
 				if (is_array($result) && isset($result[$part])) {
-					$result = &$result[$part];
+					$result = $result[$part];
 				}
 				elseif (is_object($result)) {
 					$temp = null;
 					try {
-						$temp = &$result->$part(); // try calling a method
+						$temp = $result->$part(); // try calling a method
 					}
 					catch (Exception $e) {
 						try {
-							$temp = &$result->$part; // try calling a property
+							$temp = $result->$part; // try calling a property
 						}
 						catch (Exception $e) {
 							$result = null;

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>LightFrame CRUD</title>
+</head>
+<body>
+
+<div class="models">
+<h1>Models</h1>
+{% comment %}
+<p>
+{% dummyblock %}
+{% dummyblock %}
+{% dummyblock %}
+{% dummyblock %}
+
+{% enddummyblock %}
+{% enddummyblock %}
+{% enddummyblock %}
+{% enddummyblock %}
+</p>
+{% endcomment %}
+<ul>
+{% foreach modelnames:name %}
+<li><a href="{{ ENV.site_path }}{{ url }}{{ name }}/">{{ name }}</a></li>
+{% endforeach %}
+</ul>
+</div>
+
+<div class="body">
+
+{% if exists:entries %}
+	<a href="add/">add new {{ thismodel|lowercase }}</a>
+	<table border=1><tr>
+		<th>id</th>
+		{% foreach fields:field %}
+			{% if equals:sortby.field to:field %}
+				{% if equals:sortby.order to:"asc" %}
+					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/desc/{{ field }}/">[{{ field }}]</a></th>
+				{% else %}
+					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">[{{ field }}]</a></th>
+				{% endif %}
+			{% else %}
+				<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">{{ field }}</a></th>
+			{% endif %}
+		{% endforeach %}
+		
+		{% foreach entries.asArray:entry %}
+			<tr>
+			{% foreach entry:field %}
+				<td>{{ field }}</td>
+			{% endforeach %}
+			<td><a href="del/{{ entry.id }}/">Delete</a></td>
+			</tr>
+		{% endforeach %}
+	</tr></table>
+{% elseif exists:addform %}
+	{% foreach addform:field %}
+		<p>{{ field|safe }}
+	{% endforeach %}
+{% endif %}
+</div>
+
+</body>
+</html>

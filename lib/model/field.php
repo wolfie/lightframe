@@ -1,4 +1,8 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
 
 /**
  * A metaclass for fields.
@@ -399,6 +403,46 @@ class ForeignKeyField extends Field {
 			$this->value->id = $input;
 //			$this->value->get($input);
 		}
+	}
+}
+
+class BoolField extends Field {
+	function __construct($args = null) {
+		switch (LF_SQL_RDBMS) {
+			case 'mysql': $this->sqltype = 'EVAL(\'f\',\'t\')';
+			case 'pgsql': $this->sqltype = 'BOOLEAN';
+			case 'sqlite': $this->sqltype = 'BOOLEAN';
+		}
+		parent::__construct($args);
+	}
+	
+	function _getSQLInfo() {
+		return $this->sqltype;
+	}
+	
+	function fromSQL($input) {
+		return $input === 'f' ? false : true;
+	}
+	
+	function toSQL() {
+		$sql = new SQL();
+		return $this->value === false ? $sql->escape('f') : $sql->escape('t');
+	}
+	
+	function fromToFilter($input) {
+		$input = strtolower($input);
+		switch ($input) {
+			case 'f':
+			case 'false':
+			case '0':
+				return 'f';
+			default:
+				return 't';
+		}
+	}
+	
+	function validate($input) {
+		return true;
 	}
 }
 

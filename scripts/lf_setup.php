@@ -18,6 +18,9 @@
  * version --
  * help --
  * 
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ * 
  */
 
 define('DISLPAY_HELP', true);
@@ -60,6 +63,7 @@ function setup_help($arg) {
 		"\n".
 		"startproject\n".
 		"scanserver\n".
+		"createdb\n".
 		"\n";
 	}
 	elseif (function_exists('setup_'.$arg)) {
@@ -146,11 +150,86 @@ function setup_scanserver($arg) {
 	echo "\n";
 }
 
+function setup_createdb($settingsFile) {
+	require_once(dirname(__FILE__).'/../lib/model/model.php');
+	require_once(dirname(__FILE__).'/../lib/exceptions.php');
+	
+	if (!$settingsFile) {
+		$settingsFile = "./settings.php";
+	}
+	
+	if(!is_readable($settingsFile) || !is_file($settingsFile)) {
+		trigger_error("$settingsFile is not a readable file");
+	}
+	
+	require_once($settingsFile);
+	
+	$files = _createdb_findmodelfiles(substr(LF_APPS_PATH,0,-1));
+	
+	echo WHITE."Found following model files:\n".OFF;
+	if (count($files) === 0) {
+		die("no model files found\n");
+	}
+	else foreach ($files as $file) {
+		echo $file."\n";
+		require $file;
+	}
+	echo "\n";
+	
+	$models = _createdb_findmodels($files);
+	$sql = array();
+	echo WHITE."Found following models:\n".OFF;
+	if (count($models) === 0) {
+		die ("no models found\n");
+	}
+	else foreach ($models as $model) {
+		echo "$model\n";
+		$model = new $model();
+		$sql[] = $model->_getSQLCreateTable();
+	}
+	echo "\n";
+	
+	$db = new SQL();
+	echo WHITE."Running following queries:\n".OFF;
+	foreach ($sql as $query) {
+		echo "$query\n";
+		$db->query($query);
+	}
+	
+	echo WHITE."\nok\n".OFF;
+}
+
 
 // Auxiliary functions
 
+function _createdb_findmodelfiles($dir) {
+	$files = array();
+	
+	foreach (glob($dir."/*", GLOB_ONLYDIR|GLOB_NOSORT) as $d) {
+		$files = _createdb_findmodelfiles($d);
+	}
+	
+	if (file_exists($dir.'/models.php')) {
+		$files[] = $dir.'/models.php';
+	}
+	
+	return $files;
+}
 
-
+function _createdb_findmodels($files) {
+	$models = array();
+	
+	foreach ($files as $file) {
+		$contents = file($file);
+		foreach ($contents as $line) {
+			if (preg_match("/class (?P<model>[^ ]+) extends Model/U",$line,$matches)) {
+				 $models[] = $matches['model'];
+			}
+		}
+	}
+	
+	return $models;
+}
 
 function _startproject_findfilesfrom($path) {
 	if (!is_readable(getcwd().'/'.$path)) {
@@ -159,7 +238,7 @@ function _startproject_findfilesfrom($path) {
 	
 	foreach (glob($path.'*') as $line) {
 		if (is_dir(getcwd().'/'.$line)) {
-			$files[] = _findfilesfrom($line.'/');
+			$files[] = _startproject_findfilesfrom($line.'/');
 		}
 		else {
 			if (!is_readable(getcwd().'/'.$line)) {
@@ -186,7 +265,7 @@ function _startproject_install($filelist, $destination) {
 	foreach($filelist as $file) {
 		if (is_array($file)) {
 			mkdir($destination.'/'.substr(dirname($file[0]),2));
-			_install($file, $destination.'/'.substr(dirname($file[0]),2));
+			_startproject_install($file, $destination.'/'.substr(dirname($file[0]),2));
 		}
 		else {
 			echo substr($file,2)." > $destination\n";

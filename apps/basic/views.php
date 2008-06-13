@@ -1,4 +1,8 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
 
 /**
  * Show and render a template given in the 'template' argument
@@ -28,7 +32,7 @@ function redirect($args) {
 	
 	require_once(LF_LIGHTFRAME_PATH.'lib/response/response.php');
 	$headers = new HTTPHeaders();
-	$headers->status = LF_STATUS_MOVED;
+	$headers->status = HTTPHeaders::MOVED;
 	$headers->Location = $args['url'];
 	$headers->send();
 	die();

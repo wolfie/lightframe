@@ -7,6 +7,10 @@
  * together with a template. As in Django, a context includes all variables
  * a view wants to pass on to a template. The template is defined relative to
  * the user's template path.
+ * 
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ * 
  */
 class Response {
 	public $header;
@@ -111,14 +115,15 @@ class Response {
 	}
 }
 
-define('LF_STATUS_NOT_FOUND', 404);
-define('LF_STATUS_INTERNAL_ERROR', 500);
-define('LF_STATUS_MOVED', 301);
-
 /**
  * HTTP header abstraction
  */
 class HTTPHeaders {
+	const NOT_FOUND = 404;
+	const INTERNAL_ERROR = 500;
+	const MOVED = 301;
+	const REDIRECT = 302;
+	
 	private $status = '';
 	private $headers = array();
 	
@@ -169,16 +174,17 @@ class HTTPHeaders {
 	/**
 	 * Set the status header
 	 * 
-	 * Give one of the LF_STATUS_* constants, or http status code numbers as argument.
+	 * Give one of the HTTPHeaders status constants, or http status code numbers as argument.
 	 *
 	 * @param int $status
 	 */
 	function setStatus($status) {
 		$s = 'HTTP/1.1 ';
 		switch($status) {
-			case LF_STATUS_NOT_FOUND: $s .= $status.' Not Found'; break;
-			case LF_STATUS_INTERNAL_ERROR: $s .= $status.' Internal Error'; break; 
-			case LF_STATUS_MOVED: $s .= $status. ' Moved'; break;
+			case HTTPHeaders::NOT_FOUND: $s .= $status.' Not Found'; break;
+			case HTTPHeaders::INTERNAL_ERROR: $s .= $status.' Internal Error'; break; 
+			case HTTPHeaders::MOVED: $s .= $status. ' Moved'; break;
+			case HTTPHeaders::REDIRECT: $s .= $status. ' Redirect'; break;
 			default: '200 OK';
 		}
 		$this->status = $s;

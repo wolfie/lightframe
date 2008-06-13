@@ -5,6 +5,8 @@
  * All the LightFrame project needs to import is this file. Other requirements
  * are handled internally.
  * 
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
  */
 
 set_error_handler('_errorHandler');
@@ -91,7 +93,7 @@ if (LF_AUTOFILL_SLASH === true) {
 
 // Setup env variable
 $GLOBALS['env'] = array (
-	'url' => LF_SITE_PATH,
+	'site_path' => LF_SITE_PATH,
 );
 
 // Handle possible magic_quotes_gpc presence
@@ -159,6 +161,7 @@ function addURL($url, $view, $args=array()) {
 			}
 			$GLOBALS['found'] = true;
 			echo _callView($view,$args);
+			die();
 		}
 	}
 }
@@ -176,6 +179,7 @@ function _cleanUp() {
 //		}
 		echo _callView('http/http404');
 	}
+	die();
 }
 
 /**

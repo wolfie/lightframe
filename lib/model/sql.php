@@ -1,5 +1,10 @@
 <?php
 /**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
+
+/**
  * A class to abstract different RDBMS:es under one API.
  *
  * I'm going with the NIH-syndrome here, to be as free of requirements as possible.
@@ -89,18 +94,26 @@ class SQL {
 				break;
 			
 			case 'sqlite':
-				if (!function_exists('sqlite_popen')) {
-					trigger_error('SQLite isn\'t supported by the server\'s PHP');
+				if (!class_exists("PDO", false)) {
+					trigger_error('SQLite support requires the PDO extension');
 				}
 				
-				$this->connection = sqlite_popen(LF_SQL_HOST, 0666, $error);
-				if (!$this->connection) {
-					trigger_error($error);
+				if (!in_array('sqlite',PDO::getAvailableDrivers())) {
+					trigger_error('SQLite is not supported by the server\'s PDO configuration');
+				}
+				
+				$dsn = 'sqlite:/'.LF_SQL_HOST;
+				
+				try {
+					$this->connection = new PDO($dsn);
+				}
+				catch (PDOException $e) {
+					trigger_error($e->getMessage().' - '.$dsn.' - SQLite requires write access to both the database file and the directory containing it.');
 				}
 				break;
-				
-			default: 
-				trigger_error('Database type \''.LF_SQL_RDBMS.'\' is not supported by LightFrame');
+			
+			default:
+				trigger_error('Database type '.LF_SQL_RDBMS.' is not supported');
 		}
 		
 		if ($this->connection === false) {
@@ -157,12 +170,18 @@ class SQL {
 				break;
 				
 			case 'sqlite':
-				$tempResult = sqlite_array_query($this->connection, $query, SQLITE_ASSOC, $error);
+				$tempResult = $this->connection->query($query);
 				if ($tempResult === false) {
-					throw new QueryErrorException($error.' - '.$query);
+					$error = $this->connection->errorInfo();
+					throw new QueryErrorException($error[1].': '.$error[2].' -- '.$query);
+				}
+				elseif ($tempResult->errorCode() !== '00000') {
+					$error = $tempResult->errorInfo();
+					throw new QueryErrorException($error[1].': '.$error[2].' -- '.$query);
 				}
 				
-				$this->result = $tempResult;
+				$this->result = $tempResult->fetchAll(PDO::FETCH_ASSOC);
+				$this->rows = $tempResult->rowCount();
 				break;
 				
 			default:
@@ -197,7 +216,7 @@ class SQL {
 		switch (LF_SQL_RDBMS) {
 			case 'mysql': $SQL .= "id integer NOT NULL AUTO_INCREMENT,"; break;
 			case 'pgsql': $SQL .= "id serial,"; break;
-			case 'sqlite': $SQL .= "id integer NOT NULL AUTOINCREMENT,"; break;
+			case 'sqlite': $SQL .= "id INTEGER PRIMARY KEY AUTOINCREMENT,"; break;
 			default: trigger_error('RMDBS error');
 		}
 		
@@ -213,7 +232,9 @@ class SQL {
 		$SQL .= implode(",", $tempArray);
 		
 		// define primary keys and foreign keys
-		$SQL .= ", PRIMARY KEY (id)";
+		if (LF_SQL_RDBMS !== 'sqlite') {
+			$SQL .= ", PRIMARY KEY (id)";
+		}
 		
 		$SQL .= ')';
 		
@@ -225,6 +246,22 @@ class SQL {
 		$SQL .= ';';
 
 		return $SQL;
+	}
+	
+	/**
+   * Get the SQL query to get all user tables in a database
+	 *
+	 * @return string
+	 */
+	static function getTablesSQL() {
+		switch (LF_SQL_RDBMS) {
+			case 'sqlite': return "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;";
+			case 'mysql': // "SHOW TABLES;" should work, but it's untested!
+			case 'pgsql': // "SELECT datname FROM pg_database;" should work, but it's untested!
+				trigger_error("See ".__FILE__." at ".__LINE__); 
+			default: trigger_error("DB type not supported");
+				
+		}
 	}
 
 	/**
@@ -263,11 +300,11 @@ class SQL {
 	function getLastID($tableName) {
 		switch (LF_SQL_RDBMS) {
 			case 'mysql': return mysql_insert_id(); break;
-			case 'sqlite': return sqlite_last_insert_rowid(); break;
+			case 'sqlite': return (int)$this->connection->lastInsertId(); break;
 			case 'pgsql':
 				// currval() seems to do a full sequence scan, circumcode it, compatible for pgsql < 8.2
 				// http://radix.twistedmatrix.com/2007/11/dont-use-postgress-currval.html
-				$id = $this->query('SELECT id FROM '.$tableName.' WHERE id = (SELECT currval(\''.$tableName.'\'))');
+				$id = $this->query('SELECT id FROM '.$tableName.' WHERE id = (SELECT currval(\''.$tableName.'_id_seq\'))');
 				return (int)$id['id'];
 			default:
 				trigger_error('getLastID() is not yet implemented for '.LF_SQL_RDBMS);
@@ -393,7 +430,7 @@ class SQL {
 // in case the sql is not used from LightFrame.php 
 if (!function_exists('_errorHandler')) {
 	function _simpleErrorHandler($errno, $errstr, $errfile, $errline) {
-		die("SQL error: ($errno) $errstr");
+		die("($errno) $errstr at $errfile:$errline\n");
 	}
 	set_error_handler('_simpleErrorHandler');
 }

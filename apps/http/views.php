@@ -1,5 +1,10 @@
 <?php
 /**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
+
+/**
  * Show a 404 not found
  * 
  * TODO: Clean up the function, make it more informative
@@ -15,7 +20,7 @@ function http404($args) {
 	$context['details'] = isset($args['context']['details']) ? $args['context']['details'] : '';
 	
 	$response = new Response($context, $template, true);
-	$response->header->status = LF_STATUS_NOT_FOUND;
+	$response->header->status = HTTPHeaders::NOT_FOUND;
 	return $response;
 }
 
@@ -39,7 +44,7 @@ function http500($args) {
 	$context['details'] .= '<h2>Backtrace</h2>';
 	$context['details'] .= '<pre>'.htmlspecialchars($args['backtrace']).'</pre>';
 	$response = new Response($context, $template, true);
-	$response->header->status = LF_STATUS_INTERNAL_ERROR;
+	$response->header->status = HTTPHeaders::INTERNAL_ERROR;
 	return $response;
 }
 

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
 
 class EmptyResultException extends Exception {
 	function __construct($model=null, $code = 0) {

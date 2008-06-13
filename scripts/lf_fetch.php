@@ -16,6 +16,10 @@
  * -force=bz2 -- force bzip2
  * -force=files -- force single files
  * -installpath=[path] -- install where?
+ * 
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ * 
  */
 
 // TODO: figure out a distribution structure

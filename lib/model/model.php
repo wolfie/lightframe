@@ -1,4 +1,9 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
+
 require_once 'field.php'; // autoload doesn't handle this properly
 require_once 'sql.php'; // neither this
 
@@ -64,6 +69,7 @@ abstract class Model implements Countable, Iterator {
 	private $fields = array();      // Properties defined by the user for the model
 	private $sqlTableName = '';     // The SQL table name. Use _getSQLTableName() instead of accessing this directly!
 	public $_order = '';            // The default order for this method (will probably transform to some sort of collection of defaults/meta-actions)
+	public $_file = null;           // the user is forced to give __FILE__ here.
 	public $id;
 	
 	/**
@@ -233,7 +239,7 @@ abstract class Model implements Countable, Iterator {
 			throw new Exception("Trying to delete an instance of ".get_class($this)." but no ID is specified");
 		}
 		$sql = new SQL();
-		$sql->query("DELETE FROM ".$this->_getSQLTableName()." WHERE id = {$this->id} LIMIT 1");
+		$sql->query("DELETE FROM ".$this->_getSQLTableName()." WHERE id = {$this->id}");
 		
 		// faux-selfdestruct
 		$this->id = null;
@@ -275,17 +281,23 @@ abstract class Model implements Countable, Iterator {
 	 */
 	final function _getSQLTableName() {
 		if (!$this->sqlTableName) {
+			/*
+			 * while this works even if the current models.php is included from another
+			 * app's views.php, this will break if there are more than one models.php
+			 * included. I guess it's a lesser evil of the two.
+			 *//*
 			foreach (get_included_files() as $file) {
-				/*
-				 * while this works even if the current models.php is included from another
-				 * app's views.php, this will break if there are more than one models.php
-				 * included. I guess it's a lesser evil of the two.
-				 */
 				if (preg_match('!'.addslashes(LF_APPS_PATH).'(.*)/models.php!', $file, $matches)) {
 //					$this->sqlTableName = SQL::toSysId(strtolower($matches[1].'_'.get_class($this)));
 					$this->sqlTableName = strtolower($matches[1].'_'.get_class($this));
 					break;
 				}
+			*/
+			if ($this->_file === null) {
+				trigger_error('User model "'.get_class($this).'" needs to define "$this->_file = __FILE__"');
+			}
+			else {
+				$this->sqlTableName = basename(dirname($this->_file)).'_'.get_class($this);
 			}
 		}
 
@@ -783,7 +795,7 @@ class Entries implements Countable, Iterator{
 	 */
 	final function rewind() {
 		$this->get();
-		reset($this->resultArray);
+		return reset($this->resultArray);
 	}
 	
 	/**

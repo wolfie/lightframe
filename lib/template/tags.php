@@ -1,4 +1,8 @@
 <?php
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
+ * @author Henrik Paul
+ */
 
 class DummytagTag extends TOM {
 	function evaluate() {
@@ -54,7 +58,7 @@ class IfTag extends TOM {
 		$eval = null;
 		$var = $this->evaluateVariable(current($this->args));
 		$a = &$this->args;
-
+		
 		switch (key($this->args)) {
 			case 'istrue': 
 				$eval = ($var === true); 
@@ -90,13 +94,43 @@ class IfTag extends TOM {
 				}
 				break;
 				
-			case 'exists': 
+			case 'exists':
 				$eval = ((string)$var != ''); 
 				break;
+				
+			case 'empty':
+				if (is_array($var)) {
+					$eval = (count($var) == 0); 
+				} elseif (is_object($var)) {
+					if (method_exists($var,"count")) {
+						$eval = ($var->count() == 0);
+					} else {
+						trigger_error('object '.get_class($var).' does not have a \'count\' method');
+					}
+				} else {
+					trigger_error('variable '.$a.' is not countable');
+				}
+				break;
+				
+			case 'notempty':
+				if (is_array($var)) {
+					$eval = (count($var) != 0); 
+				} elseif (is_object($var)) {
+					if (method_exists($var,"count")) {
+						$eval = ($var->count() != 0);
+					} else {
+						trigger_error('object '.get_class($var).' does not have a \'count\' method');
+					}
+				} else {
+					trigger_error('variable '.$a.' is not countable');
+				}
+				break;
+				
 			
-			default: die('invalid comparison method');
+			default: trigger_error('invalid comparison method for if clause');
 		}
 		
+		// the evaluation was true, capture the first block.
 		if ($eval === true) {
 			while (($step = $this->step()) !== false) {
 				if ($step === '{% %}') {
@@ -106,13 +140,29 @@ class IfTag extends TOM {
 				$this->result .= $step;
 			}
 		}
+		
+		// the evaluation was false, seek out other blocks to evaluate
 		else {
+			$nested = 0;
+			// scroll forwards, over the first block, discarding nodes as we go
 			while (($node = array_shift($this->nodes)) !== null ) {
-				if (strpos($node, '{% elseif') !== false) {
+				// take into account nested ifs
+				if (strpos($node, '{% if') !== false) {
+					$nested++;
+					continue;
+				}
+				elseif (strpos($node, '{% endif') !== false && $nested > 0) {
+					$nested--;
+					continue;
+				}
+				
+				// elseif was encountered, take the rest of the nodes and pass them to a new if-tag
+				elseif ($nested === 0 && strpos($node, '{% elseif') !== false) {
 					$this->result = (string) new IfTag(&$this->nodes, &$this->context, substr($node, 10,-3));
 					break;
 				}
-				elseif ($node === '{% else %}') {
+				// else was encountered, show everything until the end.
+				elseif ($nested === 0 && $node === '{% else %}') {
 					while (($step = $this->step()) !== false) {
 						$this->result .= $step;
 					}
@@ -147,18 +197,17 @@ class ForeachTag extends TOM {
 			trigger_error('\''.$for.'\' is an invalid variable for foreach');
 		}
 		if (isset($f[$as])) {
-			trigger_error('\''.$as.'\' exists already, can\'t overwrite');
+			trigger_error('\''.$as.'\' exists already in context, can\'t overwrite');
 		}
 		
 		$f['_foreach'][$as] = $var; // save the array
-		$f[$as] = $this->current($var);
+		$f[$as] = $this->reset($f['_foreach'][$as]);
 		$nodes = $this->nodes; // backup the nodes
 		$loops = count($var);
 		
 		for ($i=0; $i<$loops; $i++) {
 			$this->result .= parent::evaluate();
 			$this->nodes = $nodes; // refill the exhausted nodes
-			
 			$f[$as] = $this->next($f['_foreach'][$as]);
 		}
 		
@@ -166,6 +215,18 @@ class ForeachTag extends TOM {
 		unset($f[$as], $f['_foreach'][$as]);
 		if (count($f['_foreach']) === 0) {
 			unset($f['_foreach']);
+		}
+	}
+	
+	function reset(&$var) {
+		if (is_object($var)) {
+			if ($var->count() === 0) {
+				return null;
+			}
+			return $var->rewind();
+		}
+		else {
+			return reset($var);
 		}
 	}
 	
@@ -188,6 +249,16 @@ class ForeachTag extends TOM {
 		else {
 			return next($var);
 		}
+	}
+}
+
+class DebugTag extends TOM {
+	function evaluate() {
+		foreach ($this->args as $arg) {
+			echo $arg.": \n";
+			var_dump($this->evaluateVariable($arg));
+		}
+		die();
 	}
 }
 ?>
