@@ -8,19 +8,6 @@
 
 <div class="models">
 <h1>Models</h1>
-{% comment %}
-<p>
-{% dummyblock %}
-{% dummyblock %}
-{% dummyblock %}
-{% dummyblock %}
-
-{% enddummyblock %}
-{% enddummyblock %}
-{% enddummyblock %}
-{% enddummyblock %}
-</p>
-{% endcomment %}
 <ul>
 {% foreach modelnames:name %}
 <li><a href="{{ ENV.site_path }}{{ url }}{{ name }}/">{{ name }}</a></li>
@@ -37,9 +24,9 @@
 		{% foreach fields:field %}
 			{% if equals:sortby.field to:field %}
 				{% if equals:sortby.order to:"asc" %}
-					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/desc/{{ field }}/">[{{ field }}]</a></th>
+					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/desc/{{ field }}/">^[{{ field }}]</a></th>
 				{% else %}
-					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">[{{ field }}]</a></th>
+					<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">v[{{ field }}]</a></th>
 				{% endif %}
 			{% else %}
 				<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">{{ field }}</a></th>

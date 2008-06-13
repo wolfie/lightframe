@@ -134,10 +134,10 @@ function crud($args) {
 	elseif ($verb == 'sort') {
 		list($order, $field) = explode('/', $subject, 2);
 
-		if ($order === 'asc') {
+		if ($order === 'asc' ) {
 			$orderString = $field;
 		} elseif ($order === 'desc') {
-			$orderString = $field;
+			$orderString = '-'.$field;
 		} else {
 			throw new Exception("Sort order $order not allowed");
 		}
