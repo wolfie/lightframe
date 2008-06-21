@@ -51,6 +51,8 @@ class Template {
 		if (strpos($this->templateFile, '..') !== false) {
 			trigger_error('Template filename cannot contain ".."');
 		}
+		
+		
 		if ($this->templateFile{0} === '/') {
 			trigger_error('Template filename cannot start with "/"');
 		}
@@ -107,26 +109,46 @@ class Template {
 	private function extend() {
 		$blocks = array();
 		$template = $this->templateNodes;
+		$absolutePath = false;
 		
 		// nothing to extend
-		if (strpos($template[0], "{% extends ") !== 0) {
+		if (count($template) < 1 || strpos($template[0], "{% extends ") !== 0) {
 			return;
 		}
 
 		preg_match('!{% extends "([^"]+)"!', array_shift($template), $matches);
+		$file = $matches[1];
 		
-		if (strpos($this->templateFile, LF_TEMPLATES_PATH) === 0 ||
-				strpos($this->templateFile, LF_LIGHTFRAME_PATH.'templates/') === 0) {
-			$parentTemplate = dirname($this->templateFile).'/'.$matches[1];
+		if ($file{0} === '/') {
+			$absolutePath = true;
+			$file = substr($file, 1);
+		}
+		
+		if ($absolutePath) {
+			if (is_readable(LF_TEMPLATES_PATH.$file) && is_file(LF_TEMPLATES_PATH.$file)) {
+				 // Is it a file in the user's files? This also overrides built-in 
+				 // templates and is by design
+				$parentTemplate = LF_TEMPLATES_PATH.$file;
+			}
+			else {
+				$parentTemplate = LF_LIGHTFRAME_PATH.'templates/'.$file;
+			}
 		}
 		else {
-			die('abnormal template location error. If you see this, please report it and how you achieved it to the LightFrame community.');
+			if (strpos($this->templateFile, LF_TEMPLATES_PATH) === 0 ||
+					strpos($this->templateFile, LF_LIGHTFRAME_PATH.'templates/') === 0) {
+				$parentTemplate = dirname($this->templateFile).'/'.$file;
+			}
+			else {
+				die('abnormal template location error. If you see this, please report it and how you achieved it to the LightFrame community.');
+			}
 		}
 		
 		if (!is_file($parentTemplate) || !is_readable($parentTemplate)) {
-			trigger_error('invalid template file');
+			var_dump($matches);
+			trigger_error('invalid template file "'.$file.'"');
 		}
-		
+
 		$parentTemplate = new Template(file_get_contents($parentTemplate));
 		$parentTemplate = $parentTemplate->getNodes();
 		$resultTemplate = array();
@@ -200,8 +222,14 @@ class Template {
 		if (count($this->templateNodes) === 0) {
 			if (!$this->template) {
 				$this->template = file_get_contents($this->templateFile);
+				
+				if ($this->template === false) {
+					var_dump($this->templateFile);die();
+				}
 			}
 			
+			//echo "\n\n****\n\n";
+			//var_dump($this->template);
 			$this->templateNodes = preg_split('/({% .+ %}|{{ .+ }}|{#.*#})/U', $this->template, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 			$this->extend();
 		}
