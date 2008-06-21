@@ -57,10 +57,10 @@ class Template {
 		
 		// the template is built in. Those templates know what they are doing
 		if ($this->builtin) {
-			if (($file = LF_TEMPLATES_PATH.'/built-in/'.$this->templateFile) && (is_readable($file))) {
+			if (($file = LF_TEMPLATES_PATH.'built-in/'.$this->templateFile) && (is_readable($file))) {
 				$this->templateFile = $file;
 			}
-			elseif (($file = LF_LIGHTFRAME_PATH.'/templates/'.$this->templateFile) && (is_readable($file))) {
+			elseif (($file = LF_LIGHTFRAME_PATH.'templates/'.$this->templateFile) && (is_readable($file))) {
 				$this->templateFile = $file;
 			}
 			else {
@@ -115,11 +115,8 @@ class Template {
 
 		preg_match('!{% extends "([^"]+)"!', array_shift($template), $matches);
 		
-		// the extended file is always relative to the current template
-		if (($temp = explode(LF_TEMPLATES_PATH, $this->templateFile,2)) && (isset($temp[1]))) {
-			$parentTemplate = dirname($this->templateFile).'/'.$matches[1];
-		}
-		elseif (($temp = explode(LF_LIGHTFRAME_PATH.'/templates/', $this->templateFile,2)) && (isset($temp[1]))) {
+		if (strpos($this->templateFile, LF_TEMPLATES_PATH) === 0 ||
+				strpos($this->templateFile, LF_LIGHTFRAME_PATH.'templates/') === 0) {
 			$parentTemplate = dirname($this->templateFile).'/'.$matches[1];
 		}
 		else {
