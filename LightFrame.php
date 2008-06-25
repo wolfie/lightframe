@@ -11,20 +11,6 @@
 
 set_error_handler('_errorHandler');
 set_exception_handler('_exceptionHandler');
-// TODO: should we do some fancy exception handling throwing and handling aswell?
-
-function __autoload($class) {
-	$file = LF_LIGHTFRAME_PATH.'/lib/'.strtolower($class).'/'.strtolower($class).'.php';
-	if (file_exists($file)) {
-		require_once $file;
-	}
-	elseif (strpos($class, 'Exception') !== false) {
-		require_once LF_LIGHTFRAME_PATH.'/lib/exceptions.php';
-	}
-	else {
-		require_once strtolower($class).'.php';
-	}
-}
 
 define ('LF_NAME', 'LightFrame');
 define ('LF_VERSION', 'unfinished');
@@ -37,7 +23,13 @@ $GLOBALS['viewfunc'] = '';
 
 
 // get the settings for the current project
-require_once LF_PROJECT_PATH."settings.php";
+require_once LF_PROJECT_PATH.'settings.php';
+
+// include accessory files
+require_once LF_LIGHTFRAME_PATH.'lib/model/model.php';
+require_once LF_LIGHTFRAME_PATH.'lib/response/response.php';
+require_once LF_LIGHTFRAME_PATH.'lib/template/template.php';
+require_once LF_LIGHTFRAME_PATH.'lib/exceptions.php';
 
 // before checking url matches, fix the variables for GET method
 
