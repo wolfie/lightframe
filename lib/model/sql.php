@@ -83,8 +83,8 @@ class SQL {
 					trigger_error('PostgreSQL isn\'t supported by the server\'s PHP');
 				}
 				$db = preg_match('!(?P<host>.*)(:(?<port>[0-9]+))?!', LF_SQL_HOST, $matches);
-				$connect =  "host={$db['host']} ";
-				$connect .= isset($db['port']) ? "port={$db['port']} " : '';
+				$connect =  'host='.$db['host'].' ';
+				$connect .= isset($db['port']) ? 'port='.$db['port'].' ' : '';
 				$connect .= 'user='.LF_SQL_USER.' ';
 				$connect .= 'pass='.LF_SQL_PASS.' ';
 				$connect .= 'dbname='.LF_SQL_DBNAME;
@@ -94,7 +94,7 @@ class SQL {
 				break;
 			
 			case 'sqlite':
-				if (!class_exists("PDO", false)) {
+				if (!class_exists('PDO', false)) {
 					trigger_error('SQLite support requires the PDO extension');
 				}
 				
@@ -150,7 +150,7 @@ class SQL {
 					$this->rows = mysql_num_rows($tempResult);
 				}
 				else {
-					throw new QueryErrorException(mysql_error()." - ".$query);
+					throw new QueryErrorException(mysql_error().' - '.$query);
 				}
 				break;
 			
@@ -201,11 +201,11 @@ class SQL {
 	 * @return string The SQL query for creating a model
 	 */
 	static function createTableSQL($tableName, $cols) {
-		$SQL = "CREATE TABLE IF NOT EXISTS ".SQL::toSysId($tableName)."(";
+		$SQL = 'CREATE TABLE IF NOT EXISTS '.SQL::toSysId($tableName).'(';
 		
 		// Create sequence for primary key for engines not using autoincrementing
 		switch (LF_SQL_RDBMS) {
-			case 'pgsql': $SQL .= "CREATE SEQUENCE {$tableName}_id_seq;";
+			case 'pgsql': $SQL .= 'CREATE SEQUENCE '.$tableName.'_id_seq;';
 		}
 		
 		/*
@@ -214,9 +214,9 @@ class SQL {
 		 * projects, thus the lack of speed is hardly noticeable from the lag from PHP
 		 */
 		switch (LF_SQL_RDBMS) {
-			case 'mysql': $SQL .= "id integer NOT NULL AUTO_INCREMENT,"; break;
-			case 'pgsql': $SQL .= "id serial,"; break;
-			case 'sqlite': $SQL .= "id INTEGER PRIMARY KEY AUTOINCREMENT,"; break;
+			case 'mysql': $SQL .= 'id integer NOT NULL AUTO_INCREMENT,'; break;
+			case 'pgsql': $SQL .= 'id serial,'; break;
+			case 'sqlite': $SQL .= 'id INTEGER PRIMARY KEY AUTOINCREMENT,'; break;
 			default: trigger_error('RMDBS error');
 		}
 		
@@ -229,11 +229,11 @@ class SQL {
 			}
 			$tempArray[] = $temp;
 		}
-		$SQL .= implode(",", $tempArray);
+		$SQL .= implode(',', $tempArray);
 		
 		// define primary keys and foreign keys
 		if (LF_SQL_RDBMS !== 'sqlite') {
-			$SQL .= ", PRIMARY KEY (id)";
+			$SQL .= ', PRIMARY KEY (id)';
 		}
 		
 		$SQL .= ')';
@@ -255,11 +255,11 @@ class SQL {
 	 */
 	static function getTablesSQL() {
 		switch (LF_SQL_RDBMS) {
-			case 'sqlite': return "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;";
+			case 'sqlite': return 'SELECT name FROM sqlite_master WHERE type=\'table\' AND name NOT LIKE \'sqlite_%\' ORDER BY name;';
 			case 'mysql': // "SHOW TABLES;" should work, but it's untested!
 			case 'pgsql': // "SELECT datname FROM pg_database;" should work, but it's untested!
-				trigger_error("See ".__FILE__." at ".__LINE__); 
-			default: trigger_error("DB type not supported");
+				trigger_error('See '.__FILE__.' at '.__LINE__); 
+			default: trigger_error('DB type not supported');
 				
 		}
 	}
@@ -322,15 +322,15 @@ class SQL {
 	function escape($string) {
 		switch (LF_SQL_RDBMS) {
 			case 'mysql':
-				return "'".mysql_real_escape_string($string)."'";
+				return '\''.mysql_real_escape_string($string).'\'';
 				break;
 				
 			case 'pgsql':
-				return "'".pg_escape_string($string)."'";
+				return '\''.pg_escape_string($string).'\'';
 				break;
 			
 			case 'sqlite':
-				return "'".sqlite_escape_string($string)."'";
+				return '\''.sqlite_escape_string($string).'\'';
 				break;
 
 			default:
@@ -349,9 +349,9 @@ class SQL {
 	 */
 	static function toSysId($string) {
 		switch (LF_SQL_RDBMS) {
-			case 'mysql': return "`$string`"; break;
-			case 'pgsql': return "\"$string\""; break;
-			case 'sqlite': return "\"$string\""; break;
+			case 'mysql': return '`'.$string.'`'; break;
+			case 'pgsql': return '"'.$string.'"'; break;
+			case 'sqlite': return '"'.$string.'"'; break;
 			default: trigger_error('RDBMS support not complete');
 		}
 	}
@@ -379,8 +379,8 @@ class SQL {
 		if (!$skip && !$limit) return '';
 		
 		switch (LF_SQL_RDBMS) {
-			case 'mysql': return " LIMIT $skip, $limit"; break;
-			default: return " LIMIT $limit OFFSET $skip"; // works for pgsql+sqlite
+			case 'mysql': return ' LIMIT '.$skip.', '.$limit; break;
+			default: return ' LIMIT '.$limit.' OFFSET '.$skip; // works for pgsql+sqlite
 		}
 	}
 	

@@ -49,6 +49,7 @@ class Response {
 		}
 		
 		$this->builtin = $builtin;
+		$this->reset(); // sending null as body when sending just headers is not good
 	}	
 	
 	/**
@@ -64,7 +65,7 @@ class Response {
 	 * Clear the HTML body
 	 */
 	function reset() {
-		$this->body = "";
+		$this->body = '';
 	}
 	
 	/**
@@ -152,7 +153,7 @@ class HTTPHeaders {
 			header($this->status);
 		if ($this->headers)
 			foreach ($this->headers as $header => $value)
-				header("$header: $value");
+				header($header.': '.$value);
 	}
 	
 	/**

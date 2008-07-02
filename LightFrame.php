@@ -93,7 +93,7 @@ $GLOBALS['env'] = array (
 _unMagic();
 
 // start checking for url matches
-require_once LF_PROJECT_PATH."urls.php";
+require_once LF_PROJECT_PATH.'urls.php';
 
 // destroy the connection
 _cleanUp();
@@ -124,7 +124,7 @@ function addURL($url, $view, $args=array()) {
 		// TODO: should the regexp extensions be put somewhere more permanent? is this too slow?
 		// Regular Expression extensions:
 		$from = array(); $to = array();
-		$from[] = "[:integer:]"; $to[] = "[1-9][0-9]*"; // an integer without zero-padding
+		$from[] = '[:integer:]'; $to[] = '[1-9][0-9]*'; // an integer without zero-padding
 		$URI = str_replace($from, $to, $URI);
 	}
 	
@@ -138,7 +138,7 @@ function addURL($url, $view, $args=array()) {
 			$URI = preg_replace('@'.$url.'@U', '', $URI, 1); // get rid of what already has been matched
 			
 			$GLOBALS['app'] = (isset($GLOBALS['app']) ? '' : '/') . $view;
-			require_once LF_APPS_PATH.$view."/urls.php";
+			require_once LF_APPS_PATH.$view.'/urls.php';
 		}
 		
 		// otherwise activate a view
@@ -182,7 +182,7 @@ function _cleanUp() {
  * @return string Response
  */
 function _callView($view, $args=array()) {
-	$filePath = "";
+	$filePath = '';
 
 	// split the view into the path to the app and the function name within views.php
 	$view = explode('/',$view);
@@ -200,13 +200,13 @@ function _callView($view, $args=array()) {
 		if (!is_readable(LF_LIGHTFRAME_PATH.'apps/'.$GLOBALS['app'].'/views.php') || 
 			!is_file(LF_LIGHTFRAME_PATH.'apps/'.$GLOBALS['app'].'/views.php')) {
 
-			if ($view !== "http/http500") {
+			if ($view !== 'http/http500') {
 				// application was not found.
 				trigger_error('Application '.$GLOBALS['app'].' not found');
 			}
 			else
 				// if a rollback to the built-in 404 is being called, but that isn't found either.
-				die("Panic: built-in http500 view not found! Please check your settings, or reinstall LightFrame");
+				die('Panic: built-in http500 view not found! Please check your settings, or reinstall LightFrame');
 		} 
 		else {
 			// the app was found in the built-in apps path
@@ -223,7 +223,7 @@ function _callView($view, $args=array()) {
 	
 	if (!function_exists($GLOBALS['viewfunc'])) {
 		// view doesn't exist.
-		trigger_error("View '{$GLOBALS['view']}' does not exist");
+		trigger_error('View "'.$GLOBALS['view'].'" does not exist');
 	}
 	else {
 		// start a session?
@@ -249,7 +249,7 @@ function _callView($view, $args=array()) {
 
 function _errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	if (LF_DEBUG) {
-		$args['context']['message'] = "'$errstr' in file '$errfile' on line $errline\n";
+		$args['context']['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline."\n";
 	}
 	else {
 		$args['context']['message'] = $errstr;

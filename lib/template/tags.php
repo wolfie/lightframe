@@ -102,7 +102,7 @@ class IfTag extends TOM {
 				if (is_array($var)) {
 					$eval = (count($var) == 0); 
 				} elseif (is_object($var)) {
-					if (method_exists($var,"count")) {
+					if (method_exists($var, 'count')) {
 						$eval = ($var->count() == 0);
 					} else {
 						trigger_error('object '.get_class($var).' does not have a \'count\' method');
@@ -116,7 +116,7 @@ class IfTag extends TOM {
 				if (is_array($var)) {
 					$eval = (count($var) != 0); 
 				} elseif (is_object($var)) {
-					if (method_exists($var,"count")) {
+					if (method_exists($var, 'count')) {
 						$eval = ($var->count() != 0);
 					} else {
 						trigger_error('object '.get_class($var).' does not have a \'count\' method');
@@ -255,7 +255,7 @@ class ForeachTag extends TOM {
 class DebugTag extends TOM {
 	function evaluate() {
 		foreach ($this->args as $arg) {
-			echo $arg.": \n";
+			echo $arg.': '."\n";
 			var_dump($this->evaluateVariable($arg));
 		}
 		die();

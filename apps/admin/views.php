@@ -6,7 +6,7 @@
 
 function crud($args) {
 	if (!isset($args['app'])) {
-		trigger_error("CRUD needs argument 'app'.");
+		trigger_error('CRUD needs argument "app".');
 	}
 	if (!isset($args['context'][1]) || 
 			!isset($args['context'][2])) {
@@ -29,7 +29,7 @@ function crud($args) {
 	
 	if (!is_readable($filename) || 
 			!is_file($filename)) {
-		trigger_error("App {$args['app']} doesn't have a readable models.php file");
+		trigger_error('App '.$args['app'].' doesn\'t have a readable models.php file');
 	}
 
 	require_once($filename);
@@ -38,7 +38,7 @@ function crud($args) {
 	$modelnames = array();
 	
 	foreach (file($filename) as $line) {
-		if (preg_match("/^class (?P<class>.+?) extends Model/i", $line, $matches)) {
+		if (preg_match('/^class (?P<class>.+?) extends Model/i', $line, $matches)) {
 			$models[$matches['class']] = new $matches['class']();
 			$modelnames[] = $matches['class'];
 		}
@@ -47,7 +47,7 @@ function crud($args) {
 	$args['context']['models'] = $models;
 	$args['context']['modelnames'] = $modelnames;
 	$args['context']['url'] = $crudURL;
-	$args['context']['fields'] = isset($models[$model]) ? $models[$model]->asArray() : "";
+	$args['context']['fields'] = isset($models[$model]) ? $models[$model]->asArray() : '';
 	$args['context']['thismodel'] = $model;
 	
 	/*
@@ -74,7 +74,7 @@ function crud($args) {
 			$response = new Response();
 			$response->header->setStatus(HTTPHeaders::MOVED);
 			$response->header->Location = $redirect;
-			$response->add("");
+			$response->add('');
 			
 			return $response;
 		}
@@ -83,7 +83,7 @@ function crud($args) {
 	/*
 	 * Delete entry
 	 */
-	elseif ($verb == "del") {
+	elseif ($verb == 'del') {
 		// The subject needs to be the object's id
 		if (is_numeric($subject)) {
 			$m = new $model();
@@ -94,35 +94,35 @@ function crud($args) {
 		$response = new Response();
 		$response->header->setStatus(HTTPHeaders::MOVED);
 		$response->header->Location = $GLOBALS['env']['site_path'].$args['context'][1].$model.'/';
-		$response->add("");
+		$response->add('');
 		return $response;
 	}
 	
 	/*
 	 * Create entry
 	 */
-	elseif ($verb == "add") {
+	elseif ($verb == 'add') {
 		$m = new $model();
 
 		$args['context']['addform'] = _getCrudEditor($m);
-		return new Response($args['context'], "admin/crud.html", true);
+		return new Response($args['context'], 'admin/crud.html', true);
 	}
 	
 	/*
 	 * Update entry
 	 */
-	elseif ($verb == "edit") {
+	elseif ($verb == 'edit') {
 		if (is_numeric($subject)) {
 			$m = new $model();
 			$m->get((int)$subject);
 			$args['context']['addform'] = _getCrudEditor($m);
-			return new Response($args['context'], "admin/crud.html", true);
+			return new Response($args['context'], 'admin/crud.html', true);
 		}
 		else {
 			$response = new Response();
 			$response->header->setStatus(HTTPHeaders::MOVED);
 			$response->header->Location = $GLOBALS['env']['site_path'].$args['context'][1].$model.'/';
-			$response->add("");
+			$response->add('');
 			return $response;
 		}
 	}
@@ -139,7 +139,7 @@ function crud($args) {
 		} elseif ($order === 'desc') {
 			$orderString = '-'.$field;
 		} else {
-			throw new Exception("Sort order $order not allowed");
+			throw new Exception('Sort order '.$order.' not allowed');
 		}
 		
 		$entries = new Entries(get_class($models[$model]));
@@ -159,7 +159,7 @@ function crud($args) {
 		$response = new Response();
 		$response->header->setStatus(HTTPHeaders::MOVED);
 		$response->header->Location = $redirect;
-		$response->add("");
+		$response->add('');
 		
 		return $response;
 	}
@@ -167,20 +167,20 @@ function crud($args) {
 
 function _getFormElement($field) {
 	if ($field instanceof IntField || $field instanceof CharField) {
-		return "<input type=text>";
+		return '<input type=text>';
 	}
 	elseif ($field instanceof BoolField) {
-		return "<input type=checkbox>";
+		return '<input type=checkbox>';
 	}
 	else {
-		trigger_error("Can't get HTML input form for ".get_class($field));
+		trigger_error('Can\'t get HTML input form for '.get_class($field));
 	}
 }
 
 function _getCrudEditor(Model $model) {
 	$result = array();
 	foreach ($model->asArray() as $key) {
-		$result[] = $key.": ".$model->$key;
+		$result[] = $key.': '.$model->$key;
 	}
 	return $result;
 }

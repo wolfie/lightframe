@@ -112,7 +112,7 @@ class Template {
 		$absolutePath = false;
 		
 		// nothing to extend
-		if (count($template) < 1 || strpos($template[0], "{% extends ") !== 0) {
+		if (count($template) < 1 || strpos($template[0], '{% extends ') !== 0) {
 			return;
 		}
 
@@ -408,7 +408,7 @@ class TOM {
 		preg_match('!^{% (?P<tag>.+) (?P<args>.*)%}$!U', $node, $matches);
 		$tag = $matches['tag'];
 		$args = $matches['args'];
-		$endtag = "{% end$tag %}";
+		$endtag = '{% end'.$tag.' %}';
 		
 		$tempNodes = array();
 		$argNodes = array();
@@ -558,7 +558,7 @@ class TOM {
 				
 				$function = 'lf_filter_'.strtolower($filter);
 				if (!function_exists($function)) {
-					trigger_error("'$filter' is not a valid filter");
+					trigger_error('"'.$filter.'" is not a valid filter');
 				}
 				$result = $function((string)$result, $value);
 			}

@@ -36,8 +36,8 @@ define('CYAN', ANSI.'6m');
 define('WHITE', ANSI.'7m');
 define('OFF', chr(27).'[0m');
 
-if (!defined("STDIN")) {
-	die("You must run this script in the command line");
+if (!defined('STDIN')) {
+	die('You must run this script in the command line');
 }
 
 // show the command line help per default
@@ -46,24 +46,23 @@ if ($_SERVER['argc'] < 2) {
 	die();
 }
 
-$option = "setup_".strtolower($_SERVER['argv'][1]);
+$option = 'setup_'.strtolower($_SERVER['argv'][1]);
 $value = $_SERVER['argv'][2];
 
 if (function_exists($option)) {
 	$option($value);
 }
 else {
-	die("Unknown command\n\n");
+	die('Unknown command'."\n\n");
 }
 
 function setup_help($arg) {
 	if (!$arg) {
 		echo
-		"To get more info about a particular command, use 'help <command>' as an argument.\n".
-		"\n".
-		"startproject\n".
-		"scanserver\n".
-		"createdb\n".
+		'To get more info about a particular command, use "help <command>" as an argument.'."\n\n".
+		'startproject'."\n".
+		'scanserver'."\n".
+		'createdb'."\n".
 		"\n";
 	}
 	elseif (function_exists('setup_'.$arg)) {
@@ -71,7 +70,7 @@ function setup_help($arg) {
 		echo $function(DISPLAY_HELP);
 	}
 	else {
-		die("No such command\n\n");
+		die('No such command'."\n\n");
 	}
 }
 
@@ -79,10 +78,10 @@ function setup_help($arg) {
 function setup_startproject($arg) {
 	if ($arg === DISPLAY_HELP) {
 		echo 
-		WHITE."startproject: ".OFF."copy template files needed for a new LightFrame project\n".
-		"usage: ".WHITE."startproject".OFF." [PATH]\n".
+		WHITE.'startproject: '.OFF.'copy template files needed for a new LightFrame project'."\n".
+		'usage: '.WHITE.'startproject'.OFF.' [PATH]'."\n".
 		"\n".
-		wordwrap("if PATH is provided, the files will be copied to that path. Otherwise they are copied to the current working path\n").
+		wordwrap('if PATH is provided, the files will be copied to that path. Otherwise they are copied to the current working path'."\n").
 		"\n";
 		die();
 	}
@@ -96,18 +95,18 @@ function setup_startproject($arg) {
 	
 	$templatepath = dirname(__FILE__).'/projectfiles';
 	if (!is_dir($templatepath)) {
-		die("'$templatepath' is not a directory\n");
+		die('"'.$templatepath.'" is not a directory'."\n");
 	}
 	
 	chdir($templatepath);
 	_startproject_install(_startproject_findfilesfrom('./'), $path);
 	
-	echo "\nnew project created!\n\n";
+	echo "\n".'new project created!'."\n\n";
 }
 
 function setup_scanserver($arg) {
 	if ($arg === DISPLAY_HELP) {
-		echo "meh\n\n";
+		echo 'meh'."\n\n";
 		die();
 	}
 	
@@ -136,15 +135,15 @@ function setup_scanserver($arg) {
 	);
 	
 	foreach ($features as $group => $featureset) {
-		echo "$group:\n";
+		echo $group.":\n";
 		foreach ($featureset as $setting => $status) {
-			echo "  $setting: ".($status?"yes":"no")."\n";
+			echo '  '.$setting.': ' . ($status ? 'yes' : 'no') . "\n";
 		}
 		echo "\n";
 	}
 	
 	if (!in_array(true, $features['SQL'])) {
-		echo "The server doesn't have a supported database engine. LightFrame functionality will be very limited.\n";
+		echo 'The server does not have a supported database engine. LightFrame functionality will be very limited.'."\n";
 	}
 	
 	echo "\n";
@@ -155,20 +154,20 @@ function setup_createdb($settingsFile) {
 	require_once(dirname(__FILE__).'/../lib/exceptions.php');
 	
 	if (!$settingsFile) {
-		$settingsFile = "./settings.php";
+		$settingsFile = './settings.php';
 	}
 	
 	if(!is_readable($settingsFile) || !is_file($settingsFile)) {
-		trigger_error("$settingsFile is not a readable file");
+		trigger_error($settingsFile .'is not a readable file');
 	}
 	
 	require_once($settingsFile);
 	
 	$files = _createdb_findmodelfiles(substr(LF_APPS_PATH,0,-1));
 	
-	echo WHITE."Found following model files:\n".OFF;
+	echo WHITE.'Found following model files:'."\n".OFF;
 	if (count($files) === 0) {
-		die("no model files found\n");
+		die('no model files found'."\n");
 	}
 	else foreach ($files as $file) {
 		echo $file."\n";
@@ -178,25 +177,25 @@ function setup_createdb($settingsFile) {
 	
 	$models = _createdb_findmodels($files);
 	$sql = array();
-	echo WHITE."Found following models:\n".OFF;
+	echo WHITE.'Found following models:'."\n".OFF;
 	if (count($models) === 0) {
-		die ("no models found\n");
+		die ('no models found'."\n");
 	}
 	else foreach ($models as $model) {
-		echo "$model\n";
+		echo $model."\n";
 		$model = new $model();
 		$sql[] = $model->_getSQLCreateTable();
 	}
 	echo "\n";
 	
 	$db = new SQL();
-	echo WHITE."Running following queries:\n".OFF;
+	echo WHITE.'Running following queries:'."\n".OFF;
 	foreach ($sql as $query) {
-		echo "$query\n";
+		echo $query."\n";
 		$db->query($query);
 	}
 	
-	echo WHITE."\nok\n".OFF;
+	echo WHITE."\n".'ok'."\n".OFF;
 }
 
 
@@ -205,7 +204,7 @@ function setup_createdb($settingsFile) {
 function _createdb_findmodelfiles($dir) {
 	$files = array();
 	
-	foreach (glob($dir."/*", GLOB_ONLYDIR|GLOB_NOSORT) as $d) {
+	foreach (glob($dir.'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $d) {
 		$files = _createdb_findmodelfiles($d);
 	}
 	
@@ -222,7 +221,7 @@ function _createdb_findmodels($files) {
 	foreach ($files as $file) {
 		$contents = file($file);
 		foreach ($contents as $line) {
-			if (preg_match("/class (?P<model>[^ ]+) extends Model/U",$line,$matches)) {
+			if (preg_match('/class (?P<model>[^ ]+) extends Model/U',$line,$matches)) {
 				 $models[] = $matches['model'];
 			}
 		}
@@ -233,7 +232,7 @@ function _createdb_findmodels($files) {
 
 function _startproject_findfilesfrom($path) {
 	if (!is_readable(getcwd().'/'.$path)) {
-		die("directory is not readable: '".getcwd()."/$path'\n");
+		die('directory is not readable: "'.getcwd().'/'.$path.'"'."\n");
 	}
 	
 	foreach (glob($path.'*') as $line) {
@@ -242,7 +241,7 @@ function _startproject_findfilesfrom($path) {
 		}
 		else {
 			if (!is_readable(getcwd().'/'.$line)) {
-				die("can't read file '".getcwd()."/$line'\n");
+				die('can\'t read file "'.getcwd().'/'.$line.'"'."\n");
 			}
 			else {
 				$files[] = $line;
@@ -255,11 +254,11 @@ function _startproject_findfilesfrom($path) {
 
 function _startproject_install($filelist, $destination) {
 	if (!is_dir($destination) || !is_writable($destination)) {
-		die("can't write to directory '$destination'\n");
+		die('can\'t write to directory "'.$destination.'"'."\n");
 	}
 	
 	if (glob($destination.'/*')) {
-		die("'$destination' is not an empty directory. Can't start a new project!\n");
+		die('"'.$destination.'" is not an empty directory. Can\'t start a new project!'."\n");
 	}
 	
 	foreach($filelist as $file) {
@@ -268,7 +267,7 @@ function _startproject_install($filelist, $destination) {
 			_startproject_install($file, $destination.'/'.substr(dirname($file[0]),2));
 		}
 		else {
-			echo substr($file,2)." > $destination\n";
+			echo substr($file,2).' > '.$destination."\n";
 			copy($file, $destination.'/'.basename($file));
 		}
 	}

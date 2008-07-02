@@ -110,14 +110,14 @@ abstract class Model implements Countable, Iterator {
 			list($name, $rest) = explode('->', $name, 2);
 			if (isset($this->fields[$name])) {
 				if (!($this->fields[$name] instanceof ForeignKeyField)) {
-					throw new FieldNotFoundException("$name is not a referencing field, in model '".get_class($this)."', application '{$GLOBALS['app']}'");
+					throw new FieldNotFoundException($name .'is not a referencing field, in model "'.get_class($this).'", application "'.$GLOBALS['app'].'"');
 				}
 				return $this->fields[$name]->$rest;
 			}
 		}
 
 		// $name doesn't exist in this model
-		throw new FieldNotFoundException("'$name' is not a field, in model '".get_class($this)."', application '{$GLOBALS['app']}'");
+		throw new FieldNotFoundException('"'.$name.'" is not a field, in model "'.get_class($this).'", application "'.$GLOBALS['app'].'"');
 		die();
 	}
 	
@@ -204,7 +204,7 @@ abstract class Model implements Countable, Iterator {
 			if ($exists['count'] > 1) {
 				throw new Exception ('This really shouldn\'t happen!');
 			}
-			$exists = $exists['count'] === "1";
+			$exists = $exists['count'] === '1';
 		}
 		
 		// it's an update
@@ -236,10 +236,10 @@ abstract class Model implements Countable, Iterator {
 	 */
 	final function delete() {
 		if (!$this->id) {
-			throw new Exception("Trying to delete an instance of ".get_class($this)." but no ID is specified");
+			throw new Exception('Trying to delete an instance of '.get_class($this).' but no ID is specified');
 		}
 		$sql = new SQL();
-		$sql->query("DELETE FROM ".$this->_getSQLTableName()." WHERE id = {$this->id}");
+		$sql->query('DELETE FROM '.$this->_getSQLTableName().' WHERE id = '.$this->id);
 		
 		// faux-selfdestruct
 		$this->id = null;
@@ -407,7 +407,7 @@ class Entries implements Countable, Iterator{
 	 */
 	final function __construct($modelName) {
 		if (!class_exists($modelName, false)) {
-			trigger_error("Can't get entries for '$modelName' - no such model defined");
+			trigger_error('Can\'t get entries for "'.$modelName.'" - no such model defined');
 		}
 		
 		$this->model = new $modelName();
@@ -501,7 +501,7 @@ class Entries implements Countable, Iterator{
 		$parts = explode(' and ', strtolower($string));
 		$elements = array();
 		foreach ($operator as $key => $op) {
-			$replaceOp[] = "!$op!U";
+			$replaceOp[] = '!'.$op.'!U';
 			$replaceToOp[] = $key;
 		}
 
@@ -509,7 +509,7 @@ class Entries implements Countable, Iterator{
 			preg_match('!^(?P<field>[^ ]+) (?P<op>'.$pregop.') (?P<value>.+)$!Ui', $part, $matches);
 			
 			if (!isset($matches['op']) || !isset($matches['field']) || !isset($matches['value'])) {
-				throw new Exception("\"$part\" seems to be malformatted, in view '{$GLOBALS['view']}'");
+				throw new Exception('"'.$part.'" seems to be malformatted, in view "'.$GLOBALS['view'].'"');
 			}
 
 			$op = preg_replace ($replaceOp, $replaceToOp, $matches['op'], 1);
@@ -524,7 +524,7 @@ class Entries implements Countable, Iterator{
 				list($val1, $val2) = explode('..', $value, 2);
 				$value = 
 				  $this->model->$field->fromToFilter($val1)
-					." AND "
+					.' AND '
 					.$this->model->$field->fromToFilter($val2);
 			}
 			
@@ -541,7 +541,8 @@ class Entries implements Countable, Iterator{
 					trigger_error('\''.$field.'\' is not a time related field');
 				}
 				
-				echo "<pre>date unfinished\n";var_dump($field, $dateOp);die();
+				// FIXME: finish dates
+				echo '<pre>date unfinished\n';var_dump($field, $dateOp);die();
 			}
 			
 			// if it's a foreign key, we need to add a join table to it, and also
@@ -556,7 +557,7 @@ class Entries implements Countable, Iterator{
 				$tablename = $this->model->$model->_getSQLTableName();
 				
 				// this /could/ be done in SQL just like SQL::where() etc...
-				$this->join[$tablename] = " LEFT JOIN $tablename ON $tablename.id = ".$this->model->_getSQLTableName().".$foreignKey";
+				$this->join[$tablename] = ' LEFT JOIN '.$tablename.' ON $tablename.id = '.$this->model->_getSQLTableName().'.'.$foreignKey;
 				
 				$this->_addFieldsFrom($this->model->$model, $model);
 			}
@@ -761,7 +762,7 @@ class Entries implements Countable, Iterator{
 	final function delete() {
 		$table = $this->model->_getSQLTableName();
 		
-		$query = "DELETE $table.* FROM $table"
+		$query = 'DELETE '.$table.'.* FROM '.$table
 			.implode('', $this->join)
 			.SQL::where($this->filters, $this->exclusions)
 			.SQL::limit($this->skip, $this->limit);
@@ -862,7 +863,7 @@ class Entries implements Countable, Iterator{
 			return count($this->resultArray);
 		}
 		else {
-			$query = "SELECT COUNT(*) c FROM ".$this->model->_getSQLTableName()
+			$query = 'SELECT COUNT(*) c FROM '.$this->model->_getSQLTableName()
 			  .implode('',$this->join)
 				.SQL::where($this->filters, $this->exclusions)
 				.SQL::limit($this->skip, $this->limit);

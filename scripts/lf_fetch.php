@@ -24,8 +24,8 @@
 
 // TODO: figure out a distribution structure
 
-if (!defined("STDIN"))
-	die("You must run this script in the command line");
+if (!defined('STDIN'))
+	die('You must run this script in the command line');
 
 
 ?>
