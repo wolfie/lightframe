@@ -4,7 +4,13 @@
  * @author Henrik Paul
  */
 
-class EmptyResultException extends Exception {
+class LightFrameException extends Exception {
+	function __construct($msg=null, $code=0) {
+		parent::__construct($message, $code);
+	}
+}
+
+class EmptyResultException extends LightFrameException {
 	function __construct($model=null, $code = 0) {
 		if ($model === null) {
 			$msg = 'The result was empty';
@@ -16,7 +22,7 @@ class EmptyResultException extends Exception {
 	}
 }
 
-class InvalidFormatException extends Exception {
+class InvalidFormatException extends LightFrameException {
 	function __construct($data=null, $code = 0) {
 		if ($data === null) {
 			$msg = 'The value was invalid';
@@ -29,7 +35,7 @@ class InvalidFormatException extends Exception {
 	}
 }
 
-class NullNotAllowedException extends Exception {
+class NullNotAllowedException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		if (!$msg) {
 			$msg = 'Field tried to save null even if it is not allowed';
@@ -38,31 +44,31 @@ class NullNotAllowedException extends Exception {
 	}
 }
 
-class FieldNotFoundException extends Exception {
+class FieldNotFoundException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		parent::__construct($msg,$code);
 	}
 }
 
-class UnsupportedRDBMSException extends Exception {
+class UnsupportedRDBMSException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		parent::__construct($msg,$code);
 	}
 }
 
-class DBConnectionException extends Exception {
+class DBConnectionException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		parent::__construct($msg,$code);
 	}
 }
 
-class QueryErrorException extends Exception {
+class QueryErrorException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		parent::__construct($msg,$code);
 	}
 }
 
-class TemplateNotFoundException extends Exception {
+class TemplateNotFoundException extends LightFrameException {
 	function __construct($msg=null, $code=0) {
 		parent::__construct($msg,$code);
 	}

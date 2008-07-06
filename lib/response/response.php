@@ -18,6 +18,7 @@ class Response {
 	private $template = '';
 	private $context = array();
 	private $private = false;
+	private $isRedirected = false;
 	
 	/**
 	 * Construct
@@ -55,15 +56,24 @@ class Response {
 	 * Add to html body
 	 *
 	 * @param string $string
+	 * @throws LightFrameException
 	 */
 	function add($string) {
+		if ($this->isRedirected) {
+			throw new LightFrameException("Can't modify body anymore, response is set to redirect");
+		}
 		$this->body .= $string;
 	}
 	
 	/**
 	 * Clear the HTML body
+	 * 
+	 * @throws LightFrameException
 	 */
 	function reset() {
+		if ($this->isRedirected) {
+			throw new LightFrameException("Can't modify body anymore, response is set to redirect");
+		}
 		$this->body = '';
 	}
 	
@@ -72,11 +82,19 @@ class Response {
 	 *
 	 * @param string[optional] $templateFile which template to use
 	 * @return string old template file
+	 * @throws LightFrameException
 	 */
 	function template($templateFile = false) {
+		
 		$temp = $this->template;
-		if ($templateFile !== false)
+		
+		if ($templateFile !== false) {
+			if ($this->isRedirected) {
+				throw new LightFrameException("Can't modify body anymore, response is set to redirect");
+			}
 			$this->template = $templateFile;
+		}
+		
 		return $temp;
 	}
 	
@@ -85,12 +103,33 @@ class Response {
 	 *
 	 * @param array $context an array containing variables to be passed to the template
 	 * @return array current context
+	 * @throws LightFrameException
 	 */
 	function context($context = false) {
 		$temp = $this->context;
-		if ($context !== false)
+		if ($context !== false) {
+			if ($this->isRedirected) {
+				throw new LightFrameException("Can't modify context anymore, response is set to redirect");
+			}
 			$this->context = $context;
+		}
 		return $temp;
+	}
+	
+	/**
+	 * Have the response redirect the browser to another URL
+	 * 
+	 * After redirect is set, the response cannot be modified in any other way
+	 * than redefining the redirection
+	 *
+	 * @param string $URL
+	 */
+	function redirect($URL) {
+		$this->isRedirected = true;
+		$this->header->Location = $URL;
+		$this->body = "";
+		$this->template = null;
+		$this->context = null;
 	}
 
 	/**

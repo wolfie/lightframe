@@ -72,9 +72,7 @@ function crud($args) {
 			$redirect = $GLOBALS['env']['site_path'].$args['context'][1];
 			
 			$response = new Response();
-			$response->header->setStatus(HTTPHeaders::MOVED);
-			$response->header->Location = $redirect;
-			$response->add('');
+			$response->redirect($redirect);
 			
 			return $response;
 		}
@@ -92,9 +90,7 @@ function crud($args) {
 		}
 		
 		$response = new Response();
-		$response->header->setStatus(HTTPHeaders::MOVED);
-		$response->header->Location = $GLOBALS['env']['site_path'].$args['context'][1].$model.'/';
-		$response->add('');
+		$response->redirect($GLOBALS['env']['site_path'].$args['context'][1].$model.'/');
 		return $response;
 	}
 	
@@ -120,9 +116,7 @@ function crud($args) {
 		}
 		else {
 			$response = new Response();
-			$response->header->setStatus(HTTPHeaders::MOVED);
-			$response->header->Location = $GLOBALS['env']['site_path'].$args['context'][1].$model.'/';
-			$response->add('');
+			$response->redirect($GLOBALS['env']['site_path'].$args['context'][1].$model.'/');
 			return $response;
 		}
 	}
@@ -157,9 +151,7 @@ function crud($args) {
 		$redirect = $GLOBALS['env']['site_path'].$args['context'][1];
 		
 		$response = new Response();
-		$response->header->setStatus(HTTPHeaders::MOVED);
-		$response->header->Location = $redirect;
-		$response->add('');
+		$response->redirect($redirect);
 		
 		return $response;
 	}
