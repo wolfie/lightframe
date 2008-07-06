@@ -42,11 +42,11 @@
 			</tr>
 		{% endforeach %}
 	</tr></table>
-{% elseif exists:addform %}
+	
+{% endif %}
 	{% foreach addform:field %}
 		<p>{{ field|safe }}
 	{% endforeach %}
-{% endif %}
 </div>
 
 </body>

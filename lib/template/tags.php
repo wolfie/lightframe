@@ -194,7 +194,8 @@ class ForeachTag extends TOM {
 		$var = $this->evaluateVariable($for);
 		
 		if (!is_array($var) && !is_object($var)) {
-			trigger_error('\''.$for.'\' is an invalid variable for foreach');
+			//trigger_error('\''.$for.'\' is an invalid variable for foreach');
+			return;
 		}
 		if (isset($f[$as])) {
 			trigger_error('\''.$as.'\' exists already in context, can\'t overwrite');
