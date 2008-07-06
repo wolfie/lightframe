@@ -49,7 +49,6 @@ class Response {
 		}
 		
 		$this->builtin = $builtin;
-		$this->reset(); // sending null as body when sending just headers is not good
 	}	
 	
 	/**
@@ -99,10 +98,10 @@ class Response {
 	 *
 	 */
 	function commit() {
+		// for future references: headers_list() catches all headers to be sent.
 		if ($this->body === null && !$this->template) {
 			trigger_error('Template was not defined and body was not defined.');
 		}
-		// for future references: headers_list() catches all headers to be sent.
 				
 		$this->header->send();
 		
