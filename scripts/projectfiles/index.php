@@ -11,12 +11,12 @@ if (LF_LIGHTFRAME_PATH === '' || LF_PROJECT_PATH === '') {
 	die('<html><body><h1>Error</h1><p>You have not configured your project.</p></body></html>');
 }
 
-if (!is_file(LF_LIGHTFRAME_PATH.'LightFrame.php')) {
+if (!is_file(LF_LIGHTFRAME_PATH.'/LightFrame.php')) {
 	echo '<html><body><h1>Error</h1>';
 	echo '<p>LightFrame.php was not found, or not readable at '.LF_LIGHTFRAME_PATH;
 	echo '</p></body></html>';
 	die();
 }
 
-require_once LF_LIGHTFRAME_PATH.'LightFrame.php';
+require_once LF_LIGHTFRAME_PATH.'/LightFrame.php';
 ?>

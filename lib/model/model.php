@@ -287,7 +287,7 @@ abstract class Model implements Countable, Iterator {
 			 * included. I guess it's a lesser evil of the two.
 			 *//*
 			foreach (get_included_files() as $file) {
-				if (preg_match('!'.addslashes(LF_APPS_PATH).'(.*)/models.php!', $file, $matches)) {
+				if (preg_match('!'.addslashes(LF_APPS_PATH).'/(.*)/models.php!', $file, $matches)) {
 //					$this->sqlTableName = SQL::toSysId(strtolower($matches[1].'_'.get_class($this)));
 					$this->sqlTableName = strtolower($matches[1].'_'.get_class($this));
 					break;

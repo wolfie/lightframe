@@ -30,7 +30,7 @@ function show($args) {
 function redirect($args) {
 	_requireArgument(__FUNCTION__,'url', $args);
 	
-	require_once(LF_LIGHTFRAME_PATH.'lib/response/response.php');
+	require_once(LF_LIGHTFRAME_PATH.'/lib/response/response.php');
 	$headers = new HTTPHeaders();
 	$headers->status = HTTPHeaders::MOVED;
 	$headers->Location = $args['url'];

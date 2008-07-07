@@ -163,7 +163,7 @@ function setup_createdb($settingsFile) {
 	
 	require_once($settingsFile);
 	
-	$files = _createdb_findmodelfiles(substr(LF_APPS_PATH,0,-1));
+	$files = _createdb_findmodelfiles(LF_APPS_PATH);
 	
 	echo WHITE.'Found following model files:'."\n".OFF;
 	if (count($files) === 0) {

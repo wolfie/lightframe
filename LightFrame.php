@@ -23,13 +23,13 @@ $GLOBALS['viewfunc'] = '';
 
 
 // get the settings for the current project
-require_once LF_PROJECT_PATH.'settings.php';
+require_once LF_PROJECT_PATH.'/settings.php';
 
 // include accessory files
-require_once LF_LIGHTFRAME_PATH.'lib/model/model.php';
-require_once LF_LIGHTFRAME_PATH.'lib/response/response.php';
-require_once LF_LIGHTFRAME_PATH.'lib/template/template.php';
-require_once LF_LIGHTFRAME_PATH.'lib/exceptions.php';
+require_once LF_LIGHTFRAME_PATH.'/lib/model/model.php';
+require_once LF_LIGHTFRAME_PATH.'/lib/response/response.php';
+require_once LF_LIGHTFRAME_PATH.'/lib/template/template.php';
+require_once LF_LIGHTFRAME_PATH.'/lib/exceptions.php';
 
 // before checking url matches, fix the variables for GET method
 
@@ -93,7 +93,7 @@ $GLOBALS['env'] = array (
 _unMagic();
 
 // start checking for url matches
-require_once LF_PROJECT_PATH.'urls.php';
+require_once LF_PROJECT_PATH.'/urls.php';
 
 // destroy the connection
 _cleanUp();
@@ -138,7 +138,7 @@ function addURL($url, $view, $args=array()) {
 			$URI = preg_replace('@'.$url.'@U', '', $URI, 1); // get rid of what already has been matched
 			
 			$GLOBALS['app'] = (isset($GLOBALS['app']) ? '' : '/') . $view;
-			require_once LF_APPS_PATH.$view.'/urls.php';
+			require_once LF_APPS_PATH.'/'.$view.'/urls.php';
 		}
 		
 		// otherwise activate a view
@@ -193,12 +193,12 @@ function _callView($view, $args=array()) {
 	$GLOBALS['view'] = $GLOBALS['app'].'/'.$GLOBALS['viewfunc'];
 
 	// handle non-existing/non-accessible files
-	if (!is_readable(LF_APPS_PATH.$GLOBALS['app'].'/views.php') || 
-		!is_file(LF_APPS_PATH.$GLOBALS['app'].'/views.php')) {
+	if (!is_readable(LF_APPS_PATH.'/'.$GLOBALS['app'].'/views.php') || 
+		!is_file(LF_APPS_PATH.'/'.$GLOBALS['app'].'/views.php')) {
 	
 		// check if the view would exist/be readable in the LightFrame path
-		if (!is_readable(LF_LIGHTFRAME_PATH.'apps/'.$GLOBALS['app'].'/views.php') || 
-			!is_file(LF_LIGHTFRAME_PATH.'apps/'.$GLOBALS['app'].'/views.php')) {
+		if (!is_readable(LF_LIGHTFRAME_PATH.'/apps/'.$GLOBALS['app'].'/views.php') || 
+			!is_file(LF_LIGHTFRAME_PATH.'/apps/'.$GLOBALS['app'].'/views.php')) {
 
 			if ($view !== 'http/http500') {
 				// application was not found.
@@ -210,12 +210,12 @@ function _callView($view, $args=array()) {
 		} 
 		else {
 			// the app was found in the built-in apps path
-			$filePath = LF_LIGHTFRAME_PATH.'apps/';
+			$filePath = LF_LIGHTFRAME_PATH.'/apps/';
 		}
 	}
 	else {
 		// the app was found in the userland apps path
-		$filePath = LF_APPS_PATH;
+		$filePath = LF_APPS_PATH.'/';
 	}
 	
 	// read the app's views.php

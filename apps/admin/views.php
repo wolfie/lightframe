@@ -25,7 +25,7 @@ function crud($args) {
 	$verb    = isset($data[1]) ? $data[1] : false;
 	$subject = isset($data[2]) ? $data[2] : false;
 	
-	$filename = LF_APPS_PATH.$args['app'].'/models.php';
+	$filename = LF_APPS_PATH.'/'.$args['app'].'/models.php';
 	
 	if (!is_readable($filename) || 
 			!is_file($filename)) {

@@ -59,10 +59,10 @@ class Template {
 		
 		// the template is built in. Those templates know what they are doing
 		if ($this->builtin) {
-			if (($file = LF_TEMPLATES_PATH.'built-in/'.$this->templateFile) && (is_readable($file))) {
+			if (($file = LF_TEMPLATES_PATH.'/built-in/'.$this->templateFile) && (is_readable($file))) {
 				$this->templateFile = $file;
 			}
-			elseif (($file = LF_LIGHTFRAME_PATH.'templates/'.$this->templateFile) && (is_readable($file))) {
+			elseif (($file = LF_LIGHTFRAME_PATH.'/templates/'.$this->templateFile) && (is_readable($file))) {
 				$this->templateFile = $file;
 			}
 			else {
@@ -72,7 +72,7 @@ class Template {
 		
 		// assume default template location - [templates]/[app]/[view].html
 		elseif ($this->templateFile === '' && $this->template === '') {
-			if (($file = LF_TEMPLATES_PATH.$GLOBALS['view'].'.html') && (is_readable($file))) {
+			if (($file = LF_TEMPLATES_PATH.'/'.$GLOBALS['view'].'.html') && (is_readable($file))) {
 				$this->templateFile = $file;
 			}
 			else {
@@ -81,12 +81,12 @@ class Template {
 		}
 		
 		// A defined direct path - [templates]/[arg]
-		elseif (($file = LF_TEMPLATES_PATH.$this->templateFile) && (is_readable($file))) {
+		elseif (($file = LF_TEMPLATES_PATH.'/'.$this->templateFile) && (is_readable($file))) {
 			$this->templateFile = $file;
 		}
 		
 		// Assumed to be under the app's template path - [templates]/[app]/[arg]
-		elseif (($file = LF_TEMPLATES_PATH.$GLOBALS['app'].'/'.$this->templateFile) && (is_readable($file))) {
+		elseif (($file = LF_TEMPLATES_PATH.'/'.$GLOBALS['app'].'/'.$this->templateFile) && (is_readable($file))) {
 			$this->templateFile = $file;
 		}
 		
@@ -125,18 +125,18 @@ class Template {
 		}
 		
 		if ($absolutePath) {
-			if (is_readable(LF_TEMPLATES_PATH.$file) && is_file(LF_TEMPLATES_PATH.$file)) {
+			if (is_readable(LF_TEMPLATES_PATH.'/'.$file) && is_file(LF_TEMPLATES_PATH.$file)) {
 				 // Is it a file in the user's files? This also overrides built-in 
 				 // templates and is by design
-				$parentTemplate = LF_TEMPLATES_PATH.$file;
+				$parentTemplate = LF_TEMPLATES_PATH.'/'.$file;
 			}
 			else {
-				$parentTemplate = LF_LIGHTFRAME_PATH.'templates/'.$file;
+				$parentTemplate = LF_LIGHTFRAME_PATH.'/templates/'.$file;
 			}
 		}
 		else {
 			if (strpos($this->templateFile, LF_TEMPLATES_PATH) === 0 ||
-					strpos($this->templateFile, LF_LIGHTFRAME_PATH.'templates/') === 0) {
+					strpos($this->templateFile, LF_LIGHTFRAME_PATH.'/templates') === 0) {
 				$parentTemplate = dirname($this->templateFile).'/'.$file;
 			}
 			else {

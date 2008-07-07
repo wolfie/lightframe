@@ -27,8 +27,8 @@ define ('LF_SQL_PASS', ''); // leave blank for sqlite
  * Paths
  */
 
-define ('LF_APPS_PATH', LF_PROJECT_PATH.'apps/'); // the absolute path (include trailing slash) to applications reservoir
-define ('LF_TEMPLATES_PATH', LF_PROJECT_PATH.'templates/'); // the absolute path (include trailing slash) to templates
+define ('LF_APPS_PATH', LF_PROJECT_PATH.'/apps'); // the absolute path (include trailing slash) to applications reservoir
+define ('LF_TEMPLATES_PATH', LF_PROJECT_PATH.'/templates'); // the absolute path (include trailing slash) to templates
 define ('LF_SITE_PATH', ''); // the path (include trailing slash) to your site. Whatever comes after http://www.server.com - e.g. /~user/ or /
 
 /*
