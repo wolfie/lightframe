@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block header %}Denied{% endblock %}
+
+{% block errorNumber %}403{% endblock %}
+
+{% block reason %}
+<p>You are not allowed to see this page.</p>
+<p>This is most probably because you haven't logged in, or something similar.</p>
+<p>Try <a href="{{ ENV.site_path }}">starting over</a> and see if you spot a login form...</p>
+{% endblock %}

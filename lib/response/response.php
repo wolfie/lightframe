@@ -162,6 +162,7 @@ class HTTPHeaders {
 	const INTERNAL_ERROR = 500;
 	const MOVED = 301;
 	const REDIRECT = 302;
+	const FORBIDDEN = 403;
 	
 	private $status = '';
 	private $headers = array();

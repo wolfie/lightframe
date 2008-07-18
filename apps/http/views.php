@@ -6,8 +6,6 @@
 
 /**
  * Show a 404 not found
- * 
- * TODO: Clean up the function, make it more informative
  *
  * @param array $args
  * @return Response
@@ -20,8 +18,6 @@ function http404($args) {
 
 /**
  * Show a 500 internal server error
- * 
- * TODO: Clean up the function
  *
  * @param array $args
  * @return Response
@@ -30,12 +26,23 @@ function http500($args) {
 	$template = 'http/500.html';
 	$context = array();
 	
-	// print backtrace
-	// TODO: fix this into the template once templates are mature enough
+	// TODO:print backtrace
 	$context['details'] .= htmlspecialchars($args['backtrace']);
 	
 	$response = new Response($context, $template, true);
 	$response->header->status = HTTPHeaders::INTERNAL_ERROR;
+	return $response;
+}
+
+/**
+ * Show a 403 forbidden
+ *
+ * @param array $args
+ */
+function http403($args) {
+	$template = 'http/403.html';
+	$response = new Response(array(),'http/403.html',true);
+	$response->header->status = HTTPHeaders::FORBIDDEN;
 	return $response;
 }
 
