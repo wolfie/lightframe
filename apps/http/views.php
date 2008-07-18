@@ -35,9 +35,26 @@ function http500($args) {
 }
 
 /**
+ * Show a 401 unauthorized
+ * 
+ * This code is to be used when logging in would help
+ *
+ * @param unknown_type $args
+ * @return Response
+ */
+function http401($args) {
+	$response = new Response(array(), 'http/401.html', true);
+	$response->header->status = HTTPHeaders::UNAUTHORIZED;
+	return $response;
+}
+
+/**
  * Show a 403 forbidden
+ * 
+ * This code is to be used when logging in does not help
  *
  * @param array $args
+ * @return Response
  */
 function http403($args) {
 	$template = 'http/403.html';

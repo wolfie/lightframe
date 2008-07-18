@@ -163,6 +163,7 @@ class HTTPHeaders {
 	const MOVED = 301;
 	const REDIRECT = 302;
 	const FORBIDDEN = 403;
+	const UNAUTHORIZED = 401;
 	
 	private $status = '';
 	private $headers = array();
