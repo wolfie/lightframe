@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block header %}Page Not Found{% endblock %}
+
+{% block errorNumber %}404{% endblock %}
+
+{% block reason %}
+<p>You seem to be lost.</p>
+<p>Either you were mislead by a broken link, or you have typed a wrong address.</p>
+<p>In either case, you could try going <a href="javascript:history.go(-1)">back one step</a>, or <a href="{{ ENV.site_path }}">starting over</a>.</p>
+{% endblock %}

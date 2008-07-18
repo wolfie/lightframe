@@ -13,13 +13,7 @@
  * @return Response
  */
 function http404($args) {
-	$template = 'http/base.html';
-	$context = array();
-	$context['title'] = 'Not Found';
-	$context['message'] = isset($args['context']['message']) ? $args['context']['message'] : '';
-	$context['details'] = isset($args['context']['details']) ? $args['context']['details'] : '';
-	
-	$response = new Response($context, $template, true);
+	$response = new Response(array(), 'http/404.html', true);
 	$response->header->status = HTTPHeaders::NOT_FOUND;
 	return $response;
 }
@@ -33,16 +27,13 @@ function http404($args) {
  * @return Response
  */
 function http500($args) {
-	$template = 'http/base.html';
+	$template = 'http/500.html';
 	$context = array();
-	$context['title'] = 'Internal Server Error';
-	$context['message'] = isset($args['context']['message']) ? $args['context']['message'] : '';
-	$context['details'] = isset($args['context']['details']) ? $args['context']['details'] : '';
 	
 	// print backtrace
 	// TODO: fix this into the template once templates are mature enough
-	$context['details'] .= '<h2>Backtrace</h2>';
-	$context['details'] .= '<pre>'.htmlspecialchars($args['backtrace']).'</pre>';
+	$context['details'] .= htmlspecialchars($args['backtrace']);
+	
 	$response = new Response($context, $template, true);
 	$response->header->status = HTTPHeaders::INTERNAL_ERROR;
 	return $response;
