@@ -26,8 +26,9 @@ function http500($args) {
 	$template = 'http/500.html';
 	$context = array();
 	
-	// TODO:print backtrace
-	$context['details'] .= htmlspecialchars($args['backtrace']);
+	if (LF_DEBUG) {
+		$context['details'] = htmlspecialchars($args['backtrace']);
+	}
 	
 	$response = new Response($context, $template, true);
 	$response->header->status = HTTPHeaders::INTERNAL_ERROR;

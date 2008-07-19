@@ -10,6 +10,11 @@ body {
 
 #rightside, #leftside {
 	float: left;
+	margin-bottom: 20px;
+}
+
+#leftside {
+	width: 150px;
 }
 
 #errornumber {
@@ -21,6 +26,8 @@ body {
 	color: white;
 	-moz-border-radius-bottomleft: 10px;
 	-moz-border-radius-topleft: 10px;
+	-webkit-border-bottom-left-radius: 10px;
+	-webkit-border-top-left-radius: 10px;
 }
 
 #lf {
@@ -54,6 +61,36 @@ body {
 	font-size: 12px;
 }
 
+#stackdump {
+	clear: both;
+	width: 620px;
+}
+
+#stackdump div {
+	white-space: pre;
+	font-family: monospace;
+	font-size: 12px;
+}
+
+#label {
+	background-color: #ddd;
+	font-weight: bold;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	-webkit-border-top-left: 5px;
+	-webkit-border-top-right: 5px;
+	margin-left: 10px;
+	padding: 0 5px;
+	width: 100px;
+	color: #aaa;
+}
+
+#dumpcontents {
+	overflow:auto;
+	/*height: 100px;*/
+	border: 1px solid #aaa;
+}
+
 </style>
 
 </head>
@@ -73,6 +110,12 @@ body {
 				<p>Template body</p>
 			{% endblock %}
 		</div>
+	</div>
+	
+	<div id="stackdump">
+		{% block stackdump %}
+			<!-- empty -->
+		{% endblock %}
 	</div>
 </div>
 

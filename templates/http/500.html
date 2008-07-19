@@ -9,3 +9,10 @@
 <p>The administrator has been notified, however, and the problem will be fixed right away.</p>
 <p>Please do try again in 30 minutes or so to check if things work better.</p>
 {% endblock %}
+
+{% block stackdump %}
+{% if isset:details %}
+<div id="label">Stacktrace</div>
+<div id="dumpcontents">{{ details }}</div>
+{% endif %}
+{% endblock %}
