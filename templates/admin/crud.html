@@ -32,6 +32,7 @@
 				<th><a href="{{ ENV.site_path }}{{ url }}{{ thismodel }}/sort/asc/{{ field }}/">{{ field }}</a></th>
 			{% endif %}
 		{% endforeach %}
+		</tr>
 		
 		{% foreach entries.asArray:entry %}
 			<tr>
@@ -41,7 +42,7 @@
 			<td><a href="del/{{ entry.id }}/">Delete</a></td>
 			</tr>
 		{% endforeach %}
-	</tr></table>
+	</table>
 	
 {% endif %}
 	{% foreach addform:field %}
