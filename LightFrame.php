@@ -249,10 +249,10 @@ function _callView($view, $args=array()) {
 
 function _errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	if (LF_DEBUG) {
-		$args['context']['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline."\n";
+		$args['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline."\n";
 	}
 	else {
-		$args['context']['message'] = $errstr;
+		$args['message'] = $errstr;
 	}
 	
 	ob_start();

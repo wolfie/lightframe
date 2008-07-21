@@ -105,7 +105,7 @@ class IfTag extends TOM {
 					if (method_exists($var, 'count')) {
 						$eval = ($var->count() == 0);
 					} else {
-						trigger_error('object '.get_class($var).' does not have a \'count\' method');
+						trigger_error('class '.get_class($var).' does not have a \'count\' method');
 					}
 				} else {
 					trigger_error('variable '.$a.' is not countable');
@@ -119,7 +119,7 @@ class IfTag extends TOM {
 					if (method_exists($var, 'count')) {
 						$eval = ($var->count() != 0);
 					} else {
-						trigger_error('object '.get_class($var).' does not have a \'count\' method');
+						trigger_error('class '.get_class($var).' does not have a \'count\' method');
 					}
 				} else {
 					trigger_error('variable '.$a.' is not countable');
@@ -186,7 +186,7 @@ class ElseifTag extends TOM {
 }
 
 class ForeachTag extends TOM {
-	function evaluate() {
+	public function evaluate() {
 		$this->expectsNodes();
 		$f = &$this->context;
 		
@@ -219,7 +219,7 @@ class ForeachTag extends TOM {
 		}
 	}
 	
-	function reset(&$var) {
+	private function reset(&$var) {
 		if (is_object($var)) {
 			if ($var->count() === 0) {
 				return null;
@@ -231,7 +231,7 @@ class ForeachTag extends TOM {
 		}
 	}
 	
-	function current(&$var) {
+	private function current(&$var) {
 		if (is_object($var)) {
 			if ($var->count() === 0) {
 				return null;
@@ -243,7 +243,7 @@ class ForeachTag extends TOM {
 		}
 	}
 	
-	function next(&$var) {
+	private function next(&$var) {
 		if (is_object($var)) {
 			return $var->next();
 		}
@@ -260,6 +260,61 @@ class DebugTag extends TOM {
 			var_dump($this->evaluateVariable($arg));
 		}
 		die();
+	}
+}
+
+class CountTag extends TOM {
+	private $singular;
+	private $plural;
+	
+	function evaluate() {
+		parent::evaluate();
+		$this->expectsTag();
+		
+		$var      = $this->evaluateVariable($this->args[0]);
+		$this->singular = isset($this->args[1]) ? $this->evaluateVariable($this->args[1]) : null;
+		$this->plural   = isset($this->args[2]) ? $this->evaluateVariable($this->args[2]) : null;
+		
+		if (is_array($var)) {
+			$this->result = (string) count($var);
+			
+		} elseif (is_object($var)) {
+			try {
+				$this->result = $var->count();
+				if (!is_numeric($this->result)) {
+					$this->result = '?'.$this->conditionalPlural();
+					
+				} else {
+					
+					if ($this->result === 1) {
+						$this->result .= $this->conditionalSingular();
+					} else {
+						$this->result .= $this->conditionalPlural();
+					}
+				}
+				
+			} catch (Exception $e){
+				$this->result = '?'.$this->conditionalPlural();
+			}
+			
+		} elseif ($var) {
+			$this->result = '1'.$this->conditionalSingular();
+			
+		} else {
+			$this->result = '0'.$this->conditionalPlural();
+		}
+	}
+	
+	private function conditionalSingular() {
+		if ($this->singular != null && $this->plural != null) {
+			return ' '.$this->singular;
+		}
+	}
+	
+	private function conditionalPlural() {
+		if ($this->singular != null && $this->plural != null) {
+			return ' '.$this->plural;
+		}
 	}
 }
 ?>

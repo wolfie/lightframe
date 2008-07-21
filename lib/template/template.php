@@ -597,7 +597,7 @@ class TOM {
 	 * The result of the tag must be stored in $this->result
 	 * 
 	 */ 
-	function evaluate() {
+	public function evaluate() {
 		while (($step = $this->step()) !== false) {
 			$this->result .= $step;
 		}
