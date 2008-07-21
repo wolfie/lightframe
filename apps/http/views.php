@@ -26,8 +26,12 @@ function http500($args) {
 	$template = 'http/500.html';
 	$context = array();
 	
+	if (isset($args['message'])) {
+		$context['reason'] = $args['message'];
+	}
+	
 	if (LF_DEBUG) {
-		$context['details'] = htmlspecialchars($args['backtrace']);
+		$context['stacktrace'] = $args['backtrace'];
 	}
 	
 	$response = new Response($context, $template, true);
