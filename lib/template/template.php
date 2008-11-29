@@ -53,7 +53,7 @@ class Template {
 		}
 		
 		
-		if ($this->templateFile{0} === '/') {
+		if ($this->templateFile[0] === '/') {
 			trigger_error('Template filename cannot start with "/"');
 		}
 		
@@ -107,9 +107,9 @@ class Template {
 	 * 
 	 */
 	private function extend() {
-		$blocks = array();
 		$template = $this->templateNodes;
 		$absolutePath = false;
+		$parentTemplate = null;
 		
 		// nothing to extend
 		if (count($template) < 1 || strpos($template[0], '{% extends ') !== 0) {
@@ -119,7 +119,7 @@ class Template {
 		preg_match('!{% extends "([^"]+)"!', array_shift($template), $matches);
 		$file = $matches[1];
 		
-		if ($file{0} === '/') {
+		if ($file[0] === '/') {
 			$absolutePath = true;
 			$file = substr($file, 1);
 		}
@@ -172,7 +172,7 @@ class Template {
 				preg_match('!{% block (.+) %}!', $pNode, $matches); // no syntax checking here
 				$block = $matches[1];
 				$found = false;
-				$tSize = count($template);
+				//$tSize = count($template);
 				
 				for ($j=0; $j < $cSize; $j++) {
 					$cNode = $template[$j];
@@ -412,7 +412,7 @@ class TOM {
 		
 		$tempNodes = array();
 		$argNodes = array();
-		$arguments = array();
+		//$arguments = array();
 		$nests = 0;
 		
 		// try to seek the end pair.
@@ -469,6 +469,7 @@ class TOM {
 		$var = explode('|', $var);
 		$result = array_shift($var);
 		$filters = $var;
+		$e = null;
 		
 		// it's a numeral
 		if (is_numeric($result)) {
@@ -476,8 +477,8 @@ class TOM {
 		}
 
 		// it's a quoted string
-		elseif (($result{0} === '\'' && $result{(strlen($result)-1)} === '\'') ||
-		        ($result{0} === '"'  && $result{(strlen($result)-1)} === '"')) {
+		elseif (($result[0] === '\'' && $result[(strlen($result)-1)] === '\'') ||
+		        ($result[0] === '"'  && $result[(strlen($result)-1)] === '"')) {
 			$result = substr($result, 1, -1);
 		}
 		
@@ -511,8 +512,13 @@ class TOM {
 			
 			
 			foreach ($parts as $part) {
-				if (is_array($result) && isset($result[$part])) {
-					$result = $result[$part];
+				if (is_array($result) || $result instanceof ArrayAccess ) {
+					if (isset($result[$part])) {
+						$result = $result[$part];
+					} else {
+						$result = null;
+						break;
+					}
 				}
 				elseif (is_object($result)) {
 					$temp = null;
@@ -549,6 +555,8 @@ class TOM {
 			foreach ($filters as $filter) {
 				$data = explode(':',$filter,2);
 				$filter = $data[0];
+				$value = null;
+
 				if (isset($data[1])) {
 					$value = $data[1];
 				}
@@ -603,4 +611,3 @@ class TOM {
 		}
 	}
 }
-?>

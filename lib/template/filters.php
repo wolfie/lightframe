@@ -72,4 +72,3 @@ function lf_filter_default($string, $arg) {
 function lf_filter_safe($string, $arg) {
 	return htmlspecialchars_decode($string, ENT_QUOTES);
 }
-?>

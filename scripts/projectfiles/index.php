@@ -19,4 +19,3 @@ if (!is_file(LF_LIGHTFRAME_PATH.'/LightFrame.php')) {
 }
 
 require_once LF_LIGHTFRAME_PATH.'/LightFrame.php';
-?>

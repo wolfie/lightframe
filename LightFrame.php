@@ -26,10 +26,10 @@ $GLOBALS['viewfunc'] = '';
 require_once LF_PROJECT_PATH.'/settings.php';
 
 // include accessory files
-require_once LF_LIGHTFRAME_PATH.'/lib/model/model.php';
 require_once LF_LIGHTFRAME_PATH.'/lib/response/response.php';
 require_once LF_LIGHTFRAME_PATH.'/lib/template/template.php';
 require_once LF_LIGHTFRAME_PATH.'/lib/exceptions.php';
+require_once LF_LIGHTFRAME_PATH.'/lib/model/model.php';
 
 // before checking url matches, fix the variables for GET method
 
@@ -248,6 +248,8 @@ function _callView($view, $args=array()) {
 }
 
 function _errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
+	$args = array();
+
 	if (LF_DEBUG) {
 		$args['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline."\n";
 	}
@@ -264,7 +266,11 @@ function _errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 }
 
 function _exceptionHandler($exception) {
-	$args['context']['message'] = '<b>Uncaught Exception ('.get_class($exception).'):</b> '.(string)$exception->getMessage();
+	$args = array();
+
+	$args['message'] = 'Uncaught Exception ('.get_class($exception).')'.
+			' at line '.$exception->getLine().
+			': '.(string)$exception->getMessage();
 	$args['backtrace'] = $exception->getTraceAsString();
 	echo _callView('http/http500', $args);
 	die();
@@ -303,4 +309,3 @@ function _recUnMagic($array) {
 	}
 	return $temp;
 }
-?>

@@ -56,13 +56,11 @@ function crud($args) {
 	 
 	if (!$verb && !$subject) {
 		if (isset($models[$model])) {
-			$entries = new Entries(get_class($models[$model]));
+			$args['context']['entries'] = new Entries(get_class($models[$model]));
 		}
 		else {
-			$entries = null;
+			$args['context']['entries'] = null;
 		}
-		
-		$args['context']['entries'] = $entries;
 		
 		if (in_array($model, $modelnames) || !$model) {
 			return new Response($args['context'], 'admin/crud.html', true);
@@ -126,6 +124,10 @@ function crud($args) {
 	 */
 	
 	elseif ($verb == 'sort') {
+		$order = null;
+		$field = null;
+		$orderString = null;
+
 		list($order, $field) = explode('/', $subject, 2);
 
 		if ($order === 'asc' ) {
@@ -176,4 +178,3 @@ function _getCrudEditor(Model $model) {
 	}
 	return $result;
 }
-?>

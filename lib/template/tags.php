@@ -189,10 +189,12 @@ class ForeachTag extends TOM {
 	public function evaluate() {
 		$this->expectsNodes();
 		$f = &$this->context;
+		$for = null;
+		$as = null;
 		
 		list($for, $as) = each($this->args);
 		$var = $this->evaluateVariable($for);
-		
+
 		if (!is_array($var) && !is_object($var)) {
 			//trigger_error('\''.$for.'\' is an invalid variable for foreach');
 			return;
@@ -268,6 +270,8 @@ class CountTag extends TOM {
 	private $plural;
 	
 	function evaluate() {
+		$e = null;
+		
 		parent::evaluate();
 		$this->expectsTag();
 		
@@ -317,4 +321,3 @@ class CountTag extends TOM {
 		}
 	}
 }
-?>

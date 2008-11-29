@@ -1,15 +1,15 @@
 <?php
 /**
  * Project-specific config file
- * 
+ *
  * This file contains the necessary settings for a specific project.
  * Project wide variables, SQL settings, the stuff. This file should under
  * no circumstances be placed in the webroot or in any publicly accessible folder!
- * 
+ *
  * Keep this file secure!
- * 
+ *
  * This file contains all user-configurable settings LightFrame supports.
- * 
+ *
  */
 
 
@@ -22,6 +22,7 @@ define ('LF_SQL_HOST', 'localhost'); // server or file to SQL location
 define ('LF_SQL_DBNAME', ''); // database name, leave blank for sqlite.
 define ('LF_SQL_USER', ''); // leave blank for sqlite
 define ('LF_SQL_PASS', ''); // leave blank for sqlite
+define ('LF_SQL_UNIQUE_PREFIX', ''); // make the table names unique
 
 /*
  * Paths
@@ -57,5 +58,3 @@ define ('LF_SESSION_NAME', 'LightFrame'); // the name to use in the session cook
 #define ('LF_CRYPTO_SALT', ''); // use a unique and random string to salt password hashes
 define ('LF_DEBUG', true); // turn debug on or off
 define ('LF_EXPOSE_LIGHTFRAME', true); // show LightFrame in HTTP response header?
-
-?>

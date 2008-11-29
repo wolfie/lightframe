@@ -4,446 +4,373 @@
  * @author Henrik Paul
  */
 
-/**
- * A metaclass for fields.
- * 
- * This extends upcoming fields
- *
- */
 abstract class Field {
 	/**
-	 * The equivalent SQL type
-	 *
-	 * @var string
-	 */
-	protected $sqltype = '';
-	/**
-	 * Settings associated with the field
-	 *
-	 * @var array
-	 */
-	protected $settings = array();
-	/**
-	 * An internal representation of the field's value
-	 *
+	 * the Field's actual value
 	 * @var mixed
 	 */
-	protected $value = null;
+	protected $value;
 
 	/**
-	 * General Field constructor
-	 * 
-	 * Setup default sqltype and settings. It's recommended, but not required,
-	 * for the extended Fields to run this constructor.
-	 *
-	 * @param array $args
+	 * Has the Field been changed?
+	 * @var boolean
 	 */
-	function __construct($args) {
-		if ($this->sqltype === '') {
-			$this->sqltype = strtoupper(substr(get_class($this), 0, -5));
+	protected $dirty = false;
+
+	/**
+	 * The name of the Field in a Model
+	 * @var string
+	 */
+	protected $fieldName;
+
+	const OPERATOR_NOT_FOUND = -1;
+	const EQUAL = 0;
+	const GREATER_THAN = 1;
+	const GREATER_THAN_OR_EQUAL = 2;
+	const LESS_THAN = 3;
+	const LESS_THAN_OR_EQUAL = 4;
+	const BETWEEN = 5;
+	const NOT_EQUAL = 6;
+
+	public function __toString() {
+		return (string)$this->value;
+	}
+
+	public function set($value) {
+		if ($this->valueIsValidSQL($value)) {
+
+			// Don't make any changes if the value is the same
+			if ($value === $this->value)
+				return;
+
+			$this->value = $value;
+			$this->dirty = true;
+		} else {
+			throw new LightFrameException('"'.$value.'" is not a valid value for '.get_class($this));
 		}
-		
-		// Set the global default values
-		$defaults['null'] = false; // is null allowed
-		$defaults['default'] = null; // the default value
-		$defaults['max_length'] = null;
-		
-		$this->settings = $this->mergeArgs($defaults, $args);
+  }
+
+	public function get() {
+		return $this->value;
+  }
+
+	/**
+	 * Has the value changed since it was last retrieved?
+	 * @return boolean
+	 */
+	public function isDirty() {
+		return $this->dirty;
 	}
 
 	/**
-	 * To String
-	 * 
-	 * Cast $this->value into a string and return it
+	 * <p>
+	 * Mark the Field as not dirty.
+	 * </p>
+	 */
+	public function _markAsNotDirty() {
+		$this->dirty = false;
+	}
+
+	protected function parseNormalOperators($operator) {
+		switch (strtoupper($operator)) {
+			case 'IS':
+			case 'EQUALS':
+			case 'EQUAL_TO':
+			case 'EQUALS_TO':
+			case 'EQ':
+				return Field::EQUAL;
+
+			case 'GREATER':
+			case 'GREATER_THAN':
+			case 'GT':
+				return Field::GREATER_THAN;
+
+			case 'GREATER_OR_EQUALS':
+			case 'GREATER_OR_EQUAL_TO':
+			case 'GREATER_THAN_OR_EQUALS':
+			case 'GREATER_THAN_OR_EQUAL_TO':
+			case 'GTEQ':
+				return Field::GREATER_THAN_OR_EQUAL;
+
+			case 'LESS':
+			case 'LESS_THAN':
+			case 'LT':
+				return Field::LESS_THAN;
+
+			case 'LESS_OR_EQUALS':
+			case 'LESS_OR_EQUAL_TO':
+			case 'LESS_THAN_OR_EQUALS':
+			case 'LESS_THAN_OR_EQUAL_TO':
+			case 'LTEQ':
+				return Field::LESS_THAN_OR_EQUAL;
+
+			case 'BETWEEN':
+			case 'IS_BETWEEN':
+				return Field::BETWEEN;
+
+			case 'NOT':
+			case 'IS_NOT':
+			case 'NOT_EQUAL':
+			case 'NEQ':
+				return Field::NOT_EQUAL;
+		}
+
+			return Field::OPERATOR_NOT_FOUND;
+	}
+
+	protected function renderNormalOperators($operatorType) {
+		switch ($operatorType) {
+			case Field::EQUAL:
+				return '=';
+			case Field::GREATER_THAN:
+				return '>';
+			case Field::GREATER_THAN_OR_EQUAL:
+				return '>=';
+			case Field::LESS_THAN:
+				return '<';
+			case Field::LESS_THAN_OR_EQUAL:
+				return '<=';
+			case Field::NOT_EQUAL:
+				return '<>';
+			case Field::BETWEEN:
+				return 'BETWEEN';
+		}
+
+		return null;
+	}
+
+	/**
+	 * <p>
+	 * Set a Field's name
+	 * </p>
 	 *
+	 * <p>
+	 * This can be done only once.
+	 * </p>
+	 *
+	 * @param string $name
+	 */
+	public function _setName($name) {
+		if (!isset($this->fieldName)) {
+			$this->fieldName = $name;
+		} else {
+			throw new BadMethodCallException('Can\'t set a Field\'s name twice');
+		}
+	}
+
+  /**
+	 * <p>
+	 * Convert the SQL result from its SQL representation to its PHP-native
+	 * representation and store it into the private member <code>$value</code>.
+	 * </p>
+	 *
+	 * @param string $SqlValue The value presented by SQL
+	 * @return void
+	 * @see LF_SQL_RDBMS
+	 */
+	abstract public function inflate($SqlValue);
+
+	/**
+	 * <p>
+	 * Convert the PHP native representation in <code>$value</code> to a string
+	 * representation for SQL, as required for the currently set-up RMDBS.
+	 * </p>
+	 *
+	 * @return string SQL representation of the <code>Field</code>'s value.
+	 * @see LF_SQL_RDBMS
+	 */
+	abstract public function deflate();
+
+	/**
+	 * <p>
+	 * Check whether the input value, coming from SQL, is valid or not.
+	 * </p>
+	 *
+	 * @param string $value A string returned by SQL
+	 * @return boolean
+	 */
+	abstract public function valueIsValidSQL($value);
+
+	/**
+	 * <p>
+	 * Check whether the input value, coming from the PHP code, is valid or not.
+	 * </p>
+	 *
+	 * @param mixed $value A value that the program sets
+	 * @return boolean
+	 */
+	abstract public function valueIsValidNative($value);
+
+	/**
+	 * <p>
+	 * Convert arbitrary strings into SQL where-clauses.
+	 * </p>
+	 *
+	 * @param array(string) $subcriteria
+	 * @param array(string) $additives
 	 * @return string
 	 */
-	function __toString() {
+	abstract public function _sqlCriteria($subcriteria, $arguments);
+}
+
+abstract class StringField extends Field {
+
+	public function valueIsValidSQL($value) {
+		return true;
+	}
+
+	public function valueIsValidNative($value) {
+		return true;
+	}
+
+}
+
+abstract class NumberField extends Field {
+}
+
+class IntField extends NumberField {
+
+	public function inflate($value) {
+		if ($this->valueIsValidSQL($value)) {
+			$this->value = (int)$value;
+		} else {
+			throw new LightFrameException('could not inflate '.get_class($this). ' with value "'.$value.'"');
+		}
+	}
+
+	public function deflate() {
 		return (string) $this->value;
 	}
-	
-	/**
-	 * Return the relvar information for CREATE TABLE
-	 *
-	 * @return string
-	 */
-	function _getSQLInfo() {
-		if ($this->settings['max_length'] !== null) {
-			return $this->sqltype.'('.$this->settings['max_length'].')';
-		}
-		else {
-			return $this->sqltype;
-		}
-	}
-	
-	/**
-	 * Validate and change the internal value
-	 *
-	 * @param mixed $value
-	 */
-	function set($value=null) {
-		if ($value !== null && !$this->validate($value)) {
-			throw new InvalidFormatException(array($value,get_class($this)));
-		}
-		
-		$this->value = $value;
-	}
-	
-	/**
-	 * Return the internal value
-	 *
-	 * @return mixed
-	 */
-	function get() {
-		return $this->value;
+
+	public function valueIsValidSQL($value) {
+		return preg_match('/^[0-9]+$/',$value) === 1;
 	}
 
-	/**
-	 * Return $this->value as it would be inserted into SQL
-	 *
-	 * @return string
-	 */
-	function sql() {
-		// if the value is null, try with the default value
-		if ($this->value === null) {
-			$this->value = $this->settings['default'];
+	public function valueIsValidNative($value) {
+		return is_int($value);
+	}
+
+	public function _sqlCriteria($subcriteria, $arguments) {
+		// surplus $subcriteria ignored
+		$operator = $subcriteria[0];
+		$operatorString = '';
+
+		/*
+		 * We need a non-empty operator (even if it might be an invalid one -- taken
+		 * care of later on).
+		 */
+		if ($operator === '') {
+			throw new BadMethodCallException('operator was empty for '.get_class($this));
 		}
-		
-		// if it's still null...
-		if ($this->value === null) {
-			if ($this->settings['null']) {
-				return 'NULL';
+
+		$operatorType = $this->parseNormalOperators($operator);
+
+		if ($operatorType === Field::OPERATOR_NOT_FOUND) {
+			throw new BadMethodCallException($operator.' not understood');
+		} else {
+			$operatorString = $this->renderNormalOperators($operatorType);
+		}
+
+		if ($operatorType === Field::BETWEEN) {
+			if (count($arguments) !== 2) {
+				throw new InvalidArgumentException('\''.$operator.'\' requires exactly two arguments');
 			}
-			else {
-				throw new NullNotAllowedException();
+
+			if (!$this->valueIsValidNative($arguments[0]
+						|| !$this->valueIsValidNative($arguments[1]))) {
+				throw new InvalidArgumentException();
 			}
-		}
-		else {
-			return $this->toSQL($this->value);
-		}
-	}
-	
-	/**
-	 * Accessor for $this->settings
-	 *
-	 * @param string $setting
-	 * @return mixed
-	 */
-	function getSetting($setting) {
-		if (!isset($this->settings[$setting])) {
-			throw new Exception('Setting \''.$setting.'\' not set for \''.get_class($this).'\'');
-		}
-		else {
-			return $this->settings[$setting];
-		}
-	}
-	
-	/**
-	 * A method to merge two settings arrays (default with user defined) and return the result
-	 *
-	 * @param array $defaults
-	 * @param array $args
-	 * @return array
-	 */
-	protected function mergeArgs($defaults, $args) {
-		if (!is_array($args) && $args !== null) {
-			trigger_error(get_class($this).' needs an array argument');
-		}
-		if ($args !== null) {
-			return array_merge($defaults, $args);
-		}
-		else {
-			return $defaults;
-		}
-	}
-	
-	/**
-	 * Convert the value into internal value from a SQL result
-	 */
-	abstract function fromSQL($input);
-	/**
-	 * Convert the value into SQL-compatible mode from an internal value
-	 */
-	abstract function toSQL();
-	/**
-	 * Parse the input from a Entires->where() and return a SQL-compatible value
-	 */
-	abstract function fromToFilter($input);
-	/**
-	 * Assert whether the input is an acceptable input
-	 */
-	abstract function validate($input);
-}
 
+			return $this->fieldName.' '.$operatorString.' '.$arguments[0].' AND '.$arguments[1];
+		} else {
+			if (count($arguments) !== 1) {
+				throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument');
+			}
 
-
-
-// TODO: get these to a file of their own
-
-class TextField extends Field {
-	function __construct($args=null) {
-		parent::__construct($args);
-	}
-	
-	function validate($input) {
-		return is_string($input);
-	}
-	
-	function toSQL() {
-		$sql = new SQL();
-		return $sql->escape((string)$this->value);
-	}
-	
-	function fromSQL($input) {
-		return $input;
-	}
-	
-	function fromToFilter($input) {
-		if ($this->validate($input)) {
-			$sql = new SQL();
-			return $sql->escape($input);
+			return $this->fieldName.' '.$operatorString.' '.$arguments[0];
 		}
-		else {
-			throw new InvalidFormatException(array($input,get_class($this)));
-		}
+
 	}
 }
 
-// TODO: make it really a varchar field
-class CharField extends Field {
-	function __construct($args=null) {
-		$defaults['max_length'] = 20;
-		parent::__construct($this->mergeArgs($defaults,$args));
+class TextField extends StringField {
+	public function inflate($SqlValue) {
+		$this->value = (string)$SqlValue;
 	}
-	
-	function validate($input) {
-		return (is_string($input) && strlen($input) <= $this->settings['max_length']);
-	}
-	
-	function toSQL() {
+
+	public function deflate() {
 		$sql = new SQL();
 		return $sql->escape($this->value);
 	}
-	
-	function fromSQL($input) {
-		return $input;
-	}
-	
-	function fromToFilter($input) {
-		if ($this->validate($input)) {
+
+	public function _sqlCriteria($subcriteria, $arguments) {
+		// excess $subcriteria ignored
+		$operator = array_shift($subcriteria);
+		$operatorType = null;
+		$operatorString = '';
+
+		$operatorType = $this->parseNormalOperators($operator);
+
+		if ($operatorType === Field::OPERATOR_NOT_FOUND) {
+			switch (strtoupper($operator)) {
+				case 'STARTS_WITH':
+				case 'BEGINS_WITH':
+				case 'STARTS':
+				case 'BEGINS':
+				case 'STARTSWITH':
+				case 'BEGINSWITH':
+					$operatorType = -2;
+					break;
+
+				case 'ENDS_WITH':
+				case 'ENDS':
+				case 'ENDSWITH':
+					$operatorType = -3;
+					break;
+
+				case 'CONTAINS':
+				case 'HAS':
+					$operatorType = -4;
+					break;
+			}
+
+			if ($operatorType === Field::OPERATOR_NOT_FOUND) {
+				throw new BadMethodCallException('Operator \''.$operator.'\' not understood for '.get_class($this));
+			}
+		}
+
+		if (count($arguments) !== 1) {
+			throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument.');
+
+		} elseif (!$this->valueIsValidNative($arguments[0])) {
+			throw new InvalidArgumentException();
+
+		} else {
+			$from = array('!','%','_','[',']');
+			$to = array('!!','!%','!_','![','!]');
+			$argument = str_replace($from, $to, $arguments[0]);
+			$argument_escaped = '';
 			$sql = new SQL();
-			return $sql->escape($input);
-		}
-		else {
-			throw new InvalidFormatException(array($input,get_class($this)));
+
+			switch ($operatorType) {
+				case -2: // startswith
+					$argument_escaped = $sql->escape($argument.'%').' ESCAPE \'!\'';
+					$operatorString = 'LIKE';
+					break;
+				case -3: // endswith
+					$argument_escaped = $sql->escape('%'.$argument).' ESCAPE \'!\'';
+					$operatorString = 'LIKE';
+					break;
+				case -4: // contains
+					$argument_escaped = $sql->escape('%'.$argument.'%').' ESCAPE \'!\'';
+					$operatorString = 'LIKE';
+					break;
+				default:
+					$argument_escaped = $sql->escape($argument);
+					$operatorString = '=';
+			}
+
+			return $this->fieldName.' '.$operatorString.' '.$argument_escaped;
 		}
 	}
 }
-
-abstract class TimeField extends Field {
-	function __construct($args=null) {
-		parent::__construct($args);
-	}
-}
-
-class DateTimeField extends TimeField {
-	function __construct($args=null) {
-		$defaults['date_format'] = 'd.m.Y H:i:s'; // TODO: move this to config file?
-		parent::__construct($this->mergeArgs($defaults, $args));
-	}
-	
-	function validate($input) {
-		return is_numeric($input);
-	}
-	
-	function toSQL() {
-		return '\''.date('Y-m-d H:i:s', $this->value).'\'';
-	}
-	
-	function fromSQL($input) {
-		return strtotime($input);		
-	}
-	
-	function fromToFilter($input) {
-		if (is_numeric($input)) {
-			return (int)$input;
-		}
-		else {
-			throw new InvalidFormatException(array($input,get_class($this)));
-		}
-	}
-	
-	function __toString() {
-		return date($this->settings['date_format'], $this->value);
-	}
-}
-
-class IntField extends Field {
-	function __construct($args=null) {
-		parent::__construct($args);
-	}
-	
-	function validate($input) {
-		return ((int)$input === $input);
-	}
-	
-	function toSQL() {
-		return (string)$this->value;
-	}
-	
-	function fromSQL($input) {
-		return (int)$input;
-	}
-	
-	function fromToFilter($input) {
-		if (is_numeric($input)) {
-			return (int)$input;
-		}
-		else {
-			throw new InvalidFormatException(array($input,get_class($this)));
-		}
-	}
-}
-
-// in foreign key fields, $this->value contains the contents of the refernced model
-class ForeignKeyField extends Field {
-	private $isEvaluated = false;
-	
-	function __construct($model=null) {
-		if (!is_string($model)) {
-			trigger_error(get_class($this).' requires a Model name (string) as an argument');
-		}
-		if (!class_exists($model)) {
-			trigger_error($model.' is not an existing Model');
-		}
-		
-		// TODO: lazy creation
-		$this->value = $model;
-		$this->sqltype = 'INT';
-		
-		parent::__construct(array());
-	}
-	
-	
-	function __get($name) {
-		$this->animateField();
-		
-		if (!$this->isEvaluated && isset($this->value->id)) {
-			$this->value->get($this->value->id);
-			$this->isEvaluated = true;
-		}
-		return $this->value->$name;
-	}
-	
-	/*
-	 * until someone can get arrays converted into an amount of
-	 * arguments, this gets cludged like this.
-	 */ 
-	
-	/**
-	 * Pass function calls to the referenced model
-	 *
-	 * @param string $name
-	 * @param string $args
-	 * @return mixed
-	 */
-	function __call($name, $args) {
-		$this->animateField();
-		$this->isEvaluated = true;
-		
-		// TODO: works?
-		return call_user_func_array(array(&$this,'value',$name), $args);
-		/*
-		if (isset($args[0])) {
-			return $this->value->$name($args[0]);
-		}
-		else {
-			return $this->value->$name();
-		}
-		*/
-	}
-	
-	function get() {
-		$this->animateField();
-		return parent::get();
-	}
-	
-	/**
-	 * Make sure that the field is alive and kicking.
-	 */
-	private function animateField() {
-		if (!($this->value instanceof Field)) {
-			$field = $this->value;
-			$this->value = new $field();
-		}
-	}
-	
-	function fromSQL($input) {
-		$this->animateField();
-		$this->value->get((int)$input);
-	}
-	
-	function toSQL() {
-		return (string)$this->value->id;
-	}
-	
-	function fromToFilter($input) {
-		trigger_error(get_class($this).' can\'t be used as a part in a filter');
-	}
-	
-	function validate($input) {
-		// unused
-	}
-	
-	function set($input) {
-		if ($input instanceof Model) {
-			$this->value = $input;
-		}
-		elseif ((int)$input === $input) {
-			$this->value->id = $input;
-//			$this->value->get($input);
-		}
-	}
-}
-
-class BoolField extends Field {
-	function __construct($args = null) {
-		switch (LF_SQL_RDBMS) {
-			case 'mysql': $this->sqltype = 'EVAL(\'f\',\'t\')';
-			case 'pgsql': $this->sqltype = 'BOOLEAN';
-			case 'sqlite': $this->sqltype = 'BOOLEAN';
-		}
-		parent::__construct($args);
-	}
-	
-	function _getSQLInfo() {
-		return $this->sqltype;
-	}
-	
-	function fromSQL($input) {
-		return $input === 'f' ? false : true;
-	}
-	
-	function toSQL() {
-		$sql = new SQL();
-		return $this->value === false ? $sql->escape('f') : $sql->escape('t');
-	}
-	
-	function fromToFilter($input) {
-		$input = strtolower($input);
-		switch ($input) {
-			case 'f':
-			case 'false':
-			case '0':
-				return 'f';
-			default:
-				return 't';
-		}
-	}
-	
-	function validate($input) {
-		return true;
-	}
-}
-
-?>

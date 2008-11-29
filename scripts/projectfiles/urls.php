@@ -14,4 +14,3 @@ addURL('', 'basic/show', array('template' => 'welcome.html', 'builtin' => true))
 /*
  * Some built-in apps would be pre-inserted but commented out, once they get here
  */
-?>

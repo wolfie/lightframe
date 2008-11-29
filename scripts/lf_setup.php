@@ -57,6 +57,8 @@ else {
 }
 
 function setup_help($arg) {
+	$function = null;
+
 	if (!$arg) {
 		echo
 		'To get more info about a particular command, use "help <command>" as an argument.'."\n\n".
@@ -76,6 +78,8 @@ function setup_help($arg) {
 
 
 function setup_startproject($arg) {
+	$path = null;
+
 	if ($arg === DISPLAY_HELP) {
 		echo 
 		WHITE.'startproject: '.OFF.'copy template files needed for a new LightFrame project'."\n".
@@ -231,6 +235,8 @@ function _createdb_findmodels($files) {
 }
 
 function _startproject_findfilesfrom($path) {
+	$files = array();
+	
 	if (!is_readable(getcwd().'/'.$path)) {
 		die('directory is not readable: "'.getcwd().'/'.$path.'"'."\n");
 	}
@@ -272,4 +278,3 @@ function _startproject_install($filelist, $destination) {
 		}
 	}
 }
-?>

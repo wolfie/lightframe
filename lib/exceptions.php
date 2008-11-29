@@ -4,14 +4,19 @@
  * @author Henrik Paul
  */
 
+/**
+ * A superclass for all LightFrame's exceptions
+ */
 class LightFrameException extends Exception {
 	function __construct($msg=null, $code=0) {
-		parent::__construct($message, $code);
+		parent::__construct($msg, $code);
 	}
 }
 
 class EmptyResultException extends LightFrameException {
 	function __construct($model=null, $code = 0) {
+		$msg = null;
+		
 		if ($model === null) {
 			$msg = 'The result was empty';
 		}
@@ -24,6 +29,8 @@ class EmptyResultException extends LightFrameException {
 
 class InvalidFormatException extends LightFrameException {
 	function __construct($data=null, $code = 0) {
+		$msg = null;
+
 		if ($data === null) {
 			$msg = 'The value was invalid';
 		}
@@ -74,4 +81,4 @@ class TemplateNotFoundException extends LightFrameException {
 	}
 }
 
-?>
+class ReadOnlyException extends LightFrameException {}

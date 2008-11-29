@@ -62,10 +62,8 @@ function http401($args) {
  * @return Response
  */
 function http403($args) {
-	$template = 'http/403.html';
+//	$template = 'http/403.html';
 	$response = new Response(array(),'http/403.html',true);
 	$response->header->status = HTTPHeaders::FORBIDDEN;
 	return $response;
 }
-
-?>

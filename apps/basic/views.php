@@ -46,6 +46,9 @@ function redirect($args) {
  * @return Response/null
  */
 function passfile($args) {
+	$mime = null;
+	$e = null;
+
 	try {
 		_requireArgument(__FUNCTION__,'dir',$args);
 	}
@@ -170,5 +173,3 @@ function _requireArgument($function,$arg,&$args) {
 		throw new Exception($function.' view requries \''.$arg.'\' argument');
 	}
 }
-
-?>

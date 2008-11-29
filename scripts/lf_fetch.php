@@ -26,6 +26,3 @@
 
 if (!defined('STDIN'))
 	die('You must run this script in the command line');
-
-
-?>
