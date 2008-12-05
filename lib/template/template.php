@@ -512,6 +512,12 @@ class TOM {
 			
 			
 			foreach ($parts as $part) {
+				// if it's a field, replace it immediately with the real value
+				if ($result instanceof Field) {
+					die('foo');
+					$result = $result->get();
+				}
+
 				if (is_array($result) || $result instanceof ArrayAccess ) {
 					if (isset($result[$part])) {
 						$result = $result[$part];
@@ -521,21 +527,17 @@ class TOM {
 					}
 				}
 				elseif (is_object($result)) {
-					$temp = null;
-					try {
-						$temp = $result->$part(); // try calling a method
+					if (isset($result->$part)) {
+						$result = $result->$part;
+
+					} elseif (method_exists($result, $part)
+							|| method_exists($result, '__call')) {
+						$result = $result->$part();
+
+					} else {
+						$result = null;
+						break;
 					}
-					catch (Exception $e) {
-						try {
-							$temp = $result->$part; // try calling a property
-						}
-						catch (Exception $e) {
-							$result = null;
-							break; // no such method/property, break the loop
-						}
-					}
-					
-					$result = $temp;
 				}
 				else {
 					$result = null;
