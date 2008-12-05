@@ -514,7 +514,6 @@ class TOM {
 			foreach ($parts as $part) {
 				// if it's a field, replace it immediately with the real value
 				if ($result instanceof Field) {
-					die('foo');
 					$result = $result->get();
 				}
 
