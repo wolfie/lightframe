@@ -3,9 +3,9 @@
  * The class that outputs stuff to the browser.
  * 
  * The Response object can take either a plain HTML body, or mash a context
- * together with a template. As in Django, a context includes all variables
- * a view wants to pass on to a template. The template is defined relative to
- * the user's template path.
+ * together with a template. A context includes all variables a view wants to
+ * pass on to a template. The template is defined relative to the user's
+ * template path.
  * 
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License v2.0
  * @author Henrik Paul
