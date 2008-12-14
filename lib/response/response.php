@@ -2,7 +2,6 @@
 /**
  * The class that outputs stuff to the browser.
  * 
- * Unlike Django, you only have one method to pass back to the framework.
  * The Response object can take either a plain HTML body, or mash a context
  * together with a template. As in Django, a context includes all variables
  * a view wants to pass on to a template. The template is defined relative to
