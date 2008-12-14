@@ -269,7 +269,7 @@ function _exceptionHandler($exception) {
 	$args = array();
 
 	$args['message'] = 'Uncaught Exception ('.get_class($exception).')'.
-			' at line '.$exception->getLine().
+			' in '. $exception->getFile().':'.$exception->getLine().
 			': '.(string)$exception->getMessage();
 	$args['backtrace'] = $exception->getTraceAsString();
 	echo _callView('http/http500', $args);
