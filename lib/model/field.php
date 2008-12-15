@@ -411,3 +411,66 @@ class TextField extends StringField {
 		}
 	}
 }
+
+class ManyToOneField extends Field {
+	private $referenceModel = null;
+
+	public function __construct($reference) {
+		if (!is_string($reference) || !class_exists($reference)) {
+			throw new LightFrameException(get_class($this).
+				' expects an existing class\' name as a constructor argument'
+			);
+		}
+
+		$model = new $reference();
+
+		if (!($model instanceof Model)) {
+			throw new LightFrameException(get_class($this).
+				' expects a Model class\' name as a constructor argument'
+			);
+		}
+
+		$this->referenceModel = $model;
+	}
+
+	public function valueIsValidNative($value) {
+		return (is_object($value) && $value instanceof $this->referenceModel);
+	}
+
+	public function valueIsValidSQL($value) {
+		// This is the best we can do at the moment
+		return is_numeric($value) && ($value == (int)$value);
+	}
+
+	public function inflate() {
+		$value = (int)$this->value;
+		$this->value = clone $this->referenceModel;
+		$this->value->load($value);
+
+		if ($this->value->id !== $value) {
+			// reset the value
+			$this->value = $value;
+			$this->inflated = false;
+
+			throw new LightFrameException('Could not inflate '.
+				get_class($this).'(\''.
+				get_class($this->referenceModel).'\') with id '.$value
+			);
+		} else {
+			$this->inflated = true;
+		}
+	}
+
+	public function deflate() {
+		// before trying to deflate, save it to the database
+		if ($this->isInflated() && $this->value->_isDirty()) {
+			$this->value->save();
+		}
+
+		return (string) $this->value->id;
+	}
+
+	public function _sqlCriteria($subcriteria, $arguments) {
+		// FIXME: This should affect Entries-queries
+	}
+}
