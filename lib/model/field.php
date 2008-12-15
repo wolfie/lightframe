@@ -23,6 +23,12 @@ abstract class Field {
 	 */
 	protected $fieldName;
 
+	/**
+	 * Has the Field been inflated?
+	 * @var boolean
+	 */
+	protected $inflated = false;
+	
 	const OPERATOR_NOT_FOUND = -1;
 	const EQUAL = 0;
 	const GREATER_THAN = 1;
@@ -37,7 +43,7 @@ abstract class Field {
 	}
 
 	public function set($value) {
-		if ($this->valueIsValidSQL($value)) {
+		if ($this->valueIsValidNative($value)) {
 
 			// Don't make any changes if the value is the same
 			if ($value === $this->value)
@@ -45,12 +51,33 @@ abstract class Field {
 
 			$this->value = $value;
 			$this->dirty = true;
+			$this->inflated = true;
 		} else {
 			throw new LightFrameException('"'.$value.'" is not a valid value for '.get_class($this));
 		}
   }
 
+	public function _setFromSQL($value) {
+		if ($this->valueIsValidSQL($value)) {
+
+			// Don't make any changes if the value is the same
+			if ($value === $this->value) {
+				return;
+			}
+
+			$this->value = $value;
+			$this->dirty = false;
+			$this->inflated = false;
+
+		} else {
+			throw new LightFrameException('"'.$value.'" from SQL is not a valid value for '.get_class($this));
+		}
+	}
+
 	public function get() {
+		if (!$this->inflated) {
+			$this->inflate();
+		}
 		return $this->value;
   }
 
@@ -61,6 +88,14 @@ abstract class Field {
 	public function isDirty() {
 		return $this->dirty;
 	}
+
+	/**
+	 * Has the value been inflated since it was last retrieved?
+	 * @return boolean
+	 */
+	 public function isInflated() {
+		 return $this->inflated;
+	 }
 
 	/**
 	 * <p>
@@ -164,11 +199,14 @@ abstract class Field {
 	 * representation and store it into the private member <code>$value</code>.
 	 * </p>
 	 *
-	 * @param string $SqlValue The value presented by SQL
+	 * <p>
+	 * When inflating, the value is already in <code>$this-&gt;value</code>.
+	 * </p>
+	 *
 	 * @return void
 	 * @see LF_SQL_RDBMS
 	 */
-	abstract public function inflate($SqlValue);
+	abstract public function inflate();
 
 	/**
 	 * <p>
@@ -230,12 +268,9 @@ abstract class NumberField extends Field {
 
 class IntField extends NumberField {
 
-	public function inflate($value) {
-		if ($this->valueIsValidSQL($value)) {
-			$this->value = (int)$value;
-		} else {
-			throw new LightFrameException('could not inflate '.get_class($this). ' with value "'.$value.'"');
-		}
+	public function inflate() {
+		$this->value = (int)$this->value;
+		$this->inflated = true;
 	}
 
 	public function deflate() {
@@ -294,8 +329,10 @@ class IntField extends NumberField {
 }
 
 class TextField extends StringField {
-	public function inflate($SqlValue) {
-		$this->value = (string)$SqlValue;
+
+	public function inflate() {
+		$this->value = (string)$this->value;
+		$this->inflated = true;
 	}
 
 	public function deflate() {

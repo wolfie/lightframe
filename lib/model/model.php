@@ -23,6 +23,8 @@ abstract class Model {
 
 	//	const TABLE_NAME = 'table_name';
 	//	const ORDER_BY = 'order_by';
+	const FIELD_VALUE_SUFFIX = '__value';
+	const FIELD_OBJECT_SUFFIX = '__field';
 
 	/**
 	 * <p>Magic method to set fields.</p>
@@ -67,10 +69,24 @@ abstract class Model {
 	 */
 	final public function __get($name) {
 		if ($name === 'id') {
+			// 'id' is a special case
 			return $this->id;
 		} elseif (isset($this->_fields[$name])) {
-			return $this->_fields[$name];
+			// get the value instead of the raw object
+			return $this->_fields[$name]->get();
 		} else {
+			// Get the value explicitly instead of the raw object
+			$value = explode(Model::FIELD_VALUE_SUFFIX, $name, 2);
+			if (isset($value[1])) {
+				return $this->_fields[$value[0]]->get();
+			}
+
+			// Get the raw object explicitly, instead of the value
+			$object = explode(Model::FIELD_OBJECT_SUFFIX, $name, 2);
+			if (isset($object[1])) {
+				return $this->_fields[$object[0]];
+			}
+
 			throw new LightFrameException($name.' is not defined for '.get_class($this));
 		}
 	}
@@ -186,12 +202,11 @@ abstract class Model {
 		SQL::toSysId($this->_getSQLTableName()).
 			' WHERE id = '.$id.' LIMIT 1';
 
-		// the result is max one row anyways
-		list($result) = $sql->query($query);
+		$result = $sql->query($query);
 
 		// skip setting the model, if we didn't get a hit.
 		if (is_array($result) && count($result) > 0) {
-			$this->_initFromArray($result);
+			$this->_initFromSQLArray($result[0]);
 		}
 	}
 
@@ -202,7 +217,7 @@ abstract class Model {
 	 *
 	 * @param array $array
 	 */
-	final public function _initFromArray($array) {
+	final public function _initFromSQLArray($array) {
 		// Check that this is a valid array
 		if (!isset($array['id']) || !is_numeric($array['id'])) {
 			throw new LightFrameException('Input array needs to contain a numeric element "id"');
@@ -215,12 +230,12 @@ abstract class Model {
 		}
 
 		// this would only mess up the for-loop below, so set it manually
-		$this->id = $array['id'];
+		$this->id = (int)$array['id'];
 		unset($array['id']);
 
 		foreach (array_keys($array) as $resultKey) {
 			if (isset($this->_fields[$resultKey])) {
-				$this->__set($resultKey, $array[$resultKey]);
+				$this->_fields[$resultKey]->_setFromSQL($array[$resultKey]);
 			}
 		}
 
