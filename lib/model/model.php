@@ -147,7 +147,7 @@ abstract class Model {
 	 *    object is returned. If there is nothing to persist, this
 	 *    returns <code>null</code>.
 	 */
-	final public function _getStateSQL() {
+	final public function _getStoreSQL() {
 		$query = '';
 		if (!$this->_isRetrieved()) {
 			$insertData = array();
@@ -246,7 +246,7 @@ abstract class Model {
 	 * Save the Model's current state
 	 */
 	final public function save() {
-		$query = $this->_getStateSQL();
+		$query = $this->_getStoreSQL();
 
 		if ($query === null) {
 			return;
