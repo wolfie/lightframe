@@ -245,7 +245,19 @@ abstract class Field {
 	 * </p>
 	 *
 	 * @param array(string) $subcriteria
-	 * @param array(string) $additives
+	 *   <p>This argument contains all subcriteria for the function call. For example,
+	 *   in the code "<code>$entries->keep_where_foo__less(10)</code>" the "less"
+	 *   would be the first (and only) subcriteria.</p>
+	 *
+	 * @param array(string) $arguments
+	 *   <p>All the arguments passed to the method. In the code example
+	 *   <code>$entries->keep_where_foo__between(0,10)</code>", both integers
+	 *   0 and 10 would be passed as arguments.</p>
+	 *
+	 *   <p>The implementing is responsible for checking for correct amount and
+	 *   data types. If an erroneous method call is detected, throw an
+	 *   <code>BadMethodCallException</code>.</p>
+	 *   
 	 * @return string
 	 */
 	abstract public function _sqlCriteria($subcriteria, $arguments);
