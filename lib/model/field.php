@@ -270,7 +270,7 @@ abstract class StringField extends Field {
 	}
 
 	public function valueIsValidNative($value) {
-		return true;
+		return is_string($value);
 	}
 
 }
