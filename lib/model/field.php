@@ -342,6 +342,10 @@ class IntField extends NumberField {
 
 class TextField extends StringField {
 
+	const STARTS_WITH = -2;
+	const ENDS_WITH = -3;
+	const CONTAINS = -4;
+
 	public function inflate() {
 		$this->value = (string)$this->value;
 		$this->inflated = true;
@@ -368,18 +372,18 @@ class TextField extends StringField {
 				case 'BEGINS':
 				case 'STARTSWITH':
 				case 'BEGINSWITH':
-					$operatorType = -2;
+					$operatorType = TextField::STARTS_WITH;
 					break;
 
 				case 'ENDS_WITH':
 				case 'ENDS':
 				case 'ENDSWITH':
-					$operatorType = -3;
+					$operatorType = TextField::ENDS_WITH;
 					break;
 
 				case 'CONTAINS':
 				case 'HAS':
-					$operatorType = -4;
+					$operatorType = TextField::CONTAINS;
 					break;
 			}
 
@@ -402,18 +406,21 @@ class TextField extends StringField {
 			$sql = new SQL();
 
 			switch ($operatorType) {
-				case -2: // startswith
+				case TextField::STARTS_WITH:
 					$argument_escaped = $sql->escape($argument.'%').' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
-				case -3: // endswith
+
+				case TextField::ENDS_WITH:
 					$argument_escaped = $sql->escape('%'.$argument).' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
-				case -4: // contains
+
+				case TextField::CONTAINS:
 					$argument_escaped = $sql->escape('%'.$argument.'%').' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
+				
 				default:
 					$argument_escaped = $sql->escape($argument);
 					$operatorString = '=';
