@@ -89,7 +89,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 			$this->dirty = true;
 			$this->resultSetModel = array();
 			$this->resultSetSQL = array();
-			$this->keep = array();
+			$this->keep = array('select' => array(), 'join' => array(), 'where' => array());
 			$this->discard = array();
 			$this->joins = array();
 			$this->iteratorPointer = -1;
@@ -105,25 +105,32 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	public function  __call($name, $arguments) {
 		// Handle 'keep_where_*' and 'discard_where_*' methods
 		if (strpos($name, Entries::KEEP_KEYWORD) === 0) {
-			$criterion = '';
-			$additives = array();
-
-			$data = substr($name, strlen(Entries::KEEP_KEYWORD));
-			$data = explode(Entries::SUBCRITERIA_SEPARATOR, $data);
-			$criterion = array_shift($data);
+			$criterion = ''; // The Field's name that gets the filter applied to.
+			$additives = array(); // Additives are arbitrary commands that can be given to
+			$data      = substr($name, strlen(Entries::KEEP_KEYWORD));
+			$data      = explode(Entries::SUBCRITERIA_SEPARATOR, $data);
+			
+			$criterion = array_shift($data).Model::FIELD_OBJECT_SUFFIX; // we want to access the object itself, not only the value
 			$additives = $data;
 
-			if (isset($this->modelObject->$criterion)) {
-				$this->keep[] = $this->modelObject->$criterion->_sqlCriteria($additives, $arguments);
-				$this->dirty = true;
-			} else {
-				throw new BadMethodCallException($this->modelName.' doesn\'t contain a Field called '.$criterion);
-			}
+			$this->keep = array_merge_recursive(
+				$this->keep,
+				$this->modelObject->$criterion->_sqlCriteria($additives, $arguments)
+			);
+
+			$this->dirty = true;
+
 		} else {
 			throw new BadMethodCallException('\''.$name.'\' is not a valid method for '.get_class($this));
 		}
 	}
 
+	/**
+	 * <p>
+	 * Fetches the data from the database as defined earlier by magic function
+	 * calls.
+	 * </p>
+	 */
 	private function fetch() {
 		if ($this->dirty) {
 			$this->dirty = false;
@@ -146,7 +153,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 
 	private function getWhereClause() {
 		if (count($this->keep) > 0) {
-			return ' WHERE '.implode(' AND ',$this->keep);
+			return ' WHERE '.implode(' AND ',$this->keep['where']);
 		}
 	}
 

@@ -258,7 +258,21 @@ abstract class Field {
 	 *   data types. If an erroneous method call is detected, throw an
 	 *   <code>BadMethodCallException</code>.</p>
 	 *   
-	 * @return string
+	 * @return array
+	 *   <p>The returned array is a two-dimensional array. The first string is
+	 *   a category keyword, which tells what kind of data the array contains. The
+	 *   second string is a target SQL entity and the last one is an argument
+	 *   that determines what is done to the SQL entity (this depends on the
+	 *   category keyword).</p>
+	 *
+	 *   <p>Example:</p>
+	 *   <code><pre>
+	 *   [join]
+	 *    [`thistable`.`fk`] => "othertable"
+	 *    [`othertable`.`ffk`] => "athirdtable"
+	 *   [where]
+	 *    [0] => "`athirdtable`.`somecol` == 'something'"
+	 *   </pre></code>
 	 */
 	abstract public function _sqlCriteria($subcriteria, $arguments);
 }
@@ -334,7 +348,7 @@ class IntField extends NumberField {
 				throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument');
 			}
 
-			return $this->fieldName.' '.$operatorString.' '.$arguments[0];
+			return array('where' => $this->fieldName.' '.$operatorString.' '.$arguments[0]);
 		}
 
 	}
@@ -426,12 +440,15 @@ class TextField extends StringField {
 					$operatorString = '=';
 			}
 
-			return $this->fieldName.' '.$operatorString.' '.$argument_escaped;
+			return array('where' => $this->fieldName.' '.$operatorString.' '.$argument_escaped);
 		}
 	}
 }
 
 class ManyToOneField extends Field {
+	/**
+	 * @var Model
+	 */
 	private $referenceModel = null;
 
 	public function __construct($reference) {
