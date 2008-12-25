@@ -268,11 +268,26 @@ abstract class Field {
 	 *   <p>Example:</p>
 	 *   <code><pre>
 	 *   [join]
-	 *    [`thistable`.`fk`] => "othertable"
-	 *    [`othertable`.`ffk`] => "athirdtable"
+	 *    [*]
+	 *     [fk] => "othertable"
+	 *    [othertable]
+	 *     [ffk] => "athirdtable"
 	 *   [where]
 	 *    [0] => "`athirdtable`.`somecol` == 'something'"
 	 *   </pre></code>
+	 *
+	 *   <p>The above call would render a SQL clause similar to:</p>
+	 *
+	 *   <code><pre>
+	 *   SELECT * FROM foo f
+	 *     INNER JOIN othertable o ON f.fk = o.id
+	 *     INNER JOIN athirdtable a ON o.ffk = a.id
+	 *   WHERE
+	 *     a.somecol == 'something'
+	 *   </pre></code>
+	 *
+	 *   <p><em>Note:</em> The asterisk-keys within join sub-array are converted
+	 *   to the current model's table name</p>
 	 */
 	abstract public function _sqlCriteria($subcriteria, $arguments);
 }
@@ -507,6 +522,35 @@ class ManyToOneField extends Field {
 	}
 
 	public function _sqlCriteria($subcriteria, $arguments) {
-		// FIXME: This should affect Entries-queries
+		$model           =& $this->referenceModel;
+		$modelTableName  =  $model->_getSQLTableName();
+		$fieldName       =  $subcriteria[0];
+		$fieldObjectName =  $fieldName.Model::FIELD_OBJECT_SUFFIX;
+
+		if (isset($model->$fieldName)) {
+			$passedSubcriteria = $subcriteria;
+			array_shift($passedSubcriteria);
+
+			$array = array(
+				'join' => array('*' => array($fieldName => $modelTableName))
+			);
+
+			$criteriaArray = $model->$fieldObjectName->_sqlCriteria($passedSubcriteria, $arguments);
+
+      // Substitute the asterisk-key with the target model's SQL table name
+			if (isset($criteriaArray['join']['*'])) {
+				$asteriskJoin = $criteriaArray['join']['*'];
+
+				unset($criteriaArray['join']['*']);
+				$criteriaArray['join'][$modelTableName] = $asteriskJoin;
+			}
+
+			var_dump($array, $criteriaArray, array_merge_recursive($array,$criteriaArray));die();
+
+			return $array;
+		} else {
+			// activate the normal 'not found' message
+			$this->referenceModel->$subcriteria[0];
+		}
 	}
 }
