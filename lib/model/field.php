@@ -531,7 +531,7 @@ class ManyToOneField extends Field {
 			$passedSubcriteria = $subcriteria;
 			array_shift($passedSubcriteria);
 
-			$array = array(
+			$baseArray = array(
 				'join' => array('*' => array($fieldName => $modelTableName))
 			);
 
@@ -545,9 +545,7 @@ class ManyToOneField extends Field {
 				$criteriaArray['join'][$modelTableName] = $asteriskJoin;
 			}
 
-			var_dump($array, $criteriaArray, array_merge_recursive($array,$criteriaArray));die();
-
-			return $array;
+			return array_merge_recursive($baseArray, $criteriaArray);
 		} else {
 			// activate the normal 'not found' message
 			$this->referenceModel->$subcriteria[0];
