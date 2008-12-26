@@ -268,10 +268,8 @@ abstract class Field {
 	 *   <p>Example:</p>
 	 *   <code><pre>
 	 *   [join]
-	 *    [*]
-	 *     [fk] => "othertable"
-	 *    [othertable]
-	 *     [ffk] => "athirdtable"
+	 *    [thistable.fk] => "othertable"
+	 *    [othertable.ffk] => "athirdtable"
 	 *   [where]
 	 *    [0] => "`athirdtable`.`somecol` == 'something'"
 	 *   </pre></code>
@@ -289,7 +287,7 @@ abstract class Field {
 	 *   <p><em>Note:</em> The asterisk-keys within join sub-array are converted
 	 *   to the current model's table name</p>
 	 */
-	abstract public function _sqlCriteria($subcriteria, $arguments);
+	abstract public function _sqlCriteria(array $subcriteria, array $arguments);
 }
 
 abstract class StringField extends Field {
@@ -326,7 +324,7 @@ class IntField extends NumberField {
 		return is_int($value);
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
 		// surplus $subcriteria ignored
 		$operator = $subcriteria[0];
 		$operatorString = '';
@@ -385,7 +383,7 @@ class TextField extends StringField {
 		return $sql->escape($this->value);
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
 		// excess $subcriteria ignored
 		$operator = array_shift($subcriteria);
 		$operatorType = null;
@@ -521,34 +519,26 @@ class ManyToOneField extends Field {
 		return (string) $this->value->id;
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
 		$model           =& $this->referenceModel;
 		$modelTableName  =  $model->_getSQLTableName();
-		$fieldName       =  $subcriteria[0];
-		$fieldObjectName =  $fieldName.Model::FIELD_OBJECT_SUFFIX;
+		$wantedFieldName =  $subcriteria[0];
+		$fieldObjectName =  $wantedFieldName.Model::FIELD_OBJECT_SUFFIX;
 
-		if (isset($model->$fieldName)) {
+		if (isset($model->$wantedFieldName)) {
 			$passedSubcriteria = $subcriteria;
 			array_shift($passedSubcriteria);
 
 			$baseArray = array(
-				'join' => array('*' => array($fieldName => $modelTableName))
+				'join' => array($this->fieldName => $modelTableName)
 			);
 
 			$criteriaArray = $model->$fieldObjectName->_sqlCriteria($passedSubcriteria, $arguments);
 
-      // Substitute the asterisk-key with the target model's SQL table name
-			if (isset($criteriaArray['join']['*'])) {
-				$asteriskJoin = $criteriaArray['join']['*'];
-
-				unset($criteriaArray['join']['*']);
-				$criteriaArray['join'][$modelTableName] = $asteriskJoin;
-			}
-
 			return array_merge_recursive($baseArray, $criteriaArray);
 		} else {
 			// activate the normal 'not found' message
-			$this->referenceModel->$subcriteria[0];
+			$model->$wantedFieldName;
 		}
 	}
 }

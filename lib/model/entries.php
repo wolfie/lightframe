@@ -138,12 +138,15 @@ class Entries implements ArrayAccess, Iterator, Countable {
 			$query = '';
 			$sql = new SQL();
 
-			$query = 'SELECT * FROM '.
+			$query = 'SELECT '.
+				SQL::toSysId($this->modelObject->_getSQLTableName()).'.* FROM '.
 				$this->modelObject->_getSQLTableName().
 				$this->getJoinClause().
 				$this->getWhereClause();
 
 			$this->resultSetSQL = $sql->query($query);
+
+		//	var_dump($this->resultSetSQL);die();
 
 			// store a cached size of the count
 			$this->count = count($this->resultSetSQL);
@@ -159,9 +162,16 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	private function getJoinClause() {
-		if (count($this->keep['join']) > 0) {
+		$joinString = "";
+
+		foreach ($this->keep['join'] as $referenceColumn => $targetTable) {
+			$targetTable = SQL::toSysId($targetTable);
+
+			$joinString .= ' INNER JOIN '.$targetTable.
+				' ON '.$targetTable.'.id = '.$referenceColumn;
 		}
-		return "";
+
+		return $joinString;
 	}
 
 	public function count() {
@@ -173,6 +183,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 			$sql = new SQL();
 			$result = $sql->query('SELECT COUNT(*) FROM '.
 				$this->modelObject->_getSQLTableName().
+				$this->getJoinClause().
 				$this->getWhereClause()
 			);
 
