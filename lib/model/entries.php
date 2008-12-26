@@ -140,6 +140,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 
 			$query = 'SELECT * FROM '.
 				$this->modelObject->_getSQLTableName().
+				$this->getJoinClause().
 				$this->getWhereClause();
 
 			$this->resultSetSQL = $sql->query($query);
@@ -152,9 +153,15 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	private function getWhereClause() {
-		if (count($this->keep) > 0) {
+		if (count($this->keep['where']) > 0) {
 			return ' WHERE '.implode(' AND ',$this->keep['where']);
 		}
+	}
+
+	private function getJoinClause() {
+		if (count($this->keep['join']) > 0) {
+		}
+		return "";
 	}
 
 	public function count() {
