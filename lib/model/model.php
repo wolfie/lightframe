@@ -87,7 +87,7 @@ abstract class Model {
 				return $this->_fields[$object[0]];
 			}
 
-			throw new LightFrameException($name.' is not defined for '.get_class($this));
+			throw new LightFrameException('field \''.$name.'\' is not defined for model '.get_class($this));
 		}
 	}
 

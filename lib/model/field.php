@@ -258,9 +258,36 @@ abstract class Field {
 	 *   data types. If an erroneous method call is detected, throw an
 	 *   <code>BadMethodCallException</code>.</p>
 	 *   
-	 * @return string
+	 * @return array
+	 *   <p>The returned array is a two-dimensional array. The first string is
+	 *   a category keyword, which tells what kind of data the array contains. The
+	 *   second string is a target SQL entity and the last one is an argument
+	 *   that determines what is done to the SQL entity (this depends on the
+	 *   category keyword).</p>
+	 *
+	 *   <p>Example:</p>
+	 *   <code><pre>
+	 *   [join]
+	 *    [thistable.fk] => "othertable"
+	 *    [othertable.ffk] => "athirdtable"
+	 *   [where]
+	 *    [0] => "`athirdtable`.`somecol` == 'something'"
+	 *   </pre></code>
+	 *
+	 *   <p>The above call would render a SQL clause similar to:</p>
+	 *
+	 *   <code><pre>
+	 *   SELECT * FROM foo f
+	 *     INNER JOIN othertable o ON f.fk = o.id
+	 *     INNER JOIN athirdtable a ON o.ffk = a.id
+	 *   WHERE
+	 *     a.somecol == 'something'
+	 *   </pre></code>
+	 *
+	 *   <p><em>Note:</em> The asterisk-keys within join sub-array are converted
+	 *   to the current model's table name</p>
 	 */
-	abstract public function _sqlCriteria($subcriteria, $arguments);
+	abstract public function _sqlCriteria(array $subcriteria, array $arguments);
 }
 
 abstract class StringField extends Field {
@@ -297,7 +324,7 @@ class IntField extends NumberField {
 		return is_int($value);
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
 		// surplus $subcriteria ignored
 		$operator = $subcriteria[0];
 		$operatorString = '';
@@ -334,7 +361,7 @@ class IntField extends NumberField {
 				throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument');
 			}
 
-			return $this->fieldName.' '.$operatorString.' '.$arguments[0];
+			return array('where' => $this->fieldName.' '.$operatorString.' '.$arguments[0]);
 		}
 
 	}
@@ -356,7 +383,7 @@ class TextField extends StringField {
 		return $sql->escape($this->value);
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
 		// excess $subcriteria ignored
 		$operator = array_shift($subcriteria);
 		$operatorType = null;
@@ -426,12 +453,15 @@ class TextField extends StringField {
 					$operatorString = '=';
 			}
 
-			return $this->fieldName.' '.$operatorString.' '.$argument_escaped;
+			return array('where' => $this->fieldName.' '.$operatorString.' '.$argument_escaped);
 		}
 	}
 }
 
 class ManyToOneField extends Field {
+	/**
+	 * @var Model
+	 */
 	private $referenceModel = null;
 
 	public function __construct($reference) {
@@ -489,7 +519,26 @@ class ManyToOneField extends Field {
 		return (string) $this->value->id;
 	}
 
-	public function _sqlCriteria($subcriteria, $arguments) {
-		// FIXME: This should affect Entries-queries
+	public function _sqlCriteria(array $subcriteria, array $arguments) {
+		$model           =& $this->referenceModel;
+		$modelTableName  =  $model->_getSQLTableName();
+		$wantedFieldName =  $subcriteria[0];
+		$fieldObjectName =  $wantedFieldName.Model::FIELD_OBJECT_SUFFIX;
+
+		if (isset($model->$wantedFieldName)) {
+			$passedSubcriteria = $subcriteria;
+			array_shift($passedSubcriteria);
+
+			$baseArray = array(
+				'join' => array($this->fieldName => $modelTableName)
+			);
+
+			$criteriaArray = $model->$fieldObjectName->_sqlCriteria($passedSubcriteria, $arguments);
+
+			return array_merge_recursive($baseArray, $criteriaArray);
+		} else {
+			// activate the normal 'not found' message
+			$model->$wantedFieldName;
+		}
 	}
 }
