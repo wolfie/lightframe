@@ -28,7 +28,7 @@ abstract class Field {
 	 * @var boolean
 	 */
 	protected $inflated = false;
-	
+
 	const OPERATOR_NOT_FOUND = -1;
 	const EQUAL = 0;
 	const GREATER_THAN = 1;
@@ -257,7 +257,7 @@ abstract class Field {
 	 *   <p>The implementing is responsible for checking for correct amount and
 	 *   data types. If an erroneous method call is detected, throw an
 	 *   <code>BadMethodCallException</code>.</p>
-	 *   
+	 *
 	 * @return array
 	 *   <p>The returned array is a two-dimensional array. The first string is
 	 *   a category keyword, which tells what kind of data the array contains. The
@@ -419,11 +419,33 @@ class TextField extends StringField {
 			}
 		}
 
-		if (count($arguments) !== 1) {
+		if ($operatorType === Field::BETWEEN) {
+			// Special case for BETWEEN-operator, even though it's a bit weird a case
+
+			if (count($arguments) !== 2) {
+				throw new InvalidArgumentException('\''.$operator.'\' requires exactly two arguments.');
+			}
+
+			if (!$this->valueIsValidNative($arguments[0])) {
+				throw new InvalidArgumentException('\''.$arguments[0].'\' is not a valid arugment.');
+			}
+
+			if (!$this->valueIsValidNative($arguments[1])) {
+				throw new InvalidArgumentException('\''.$arguments[1].'\' is not a valid arugment.');
+			}
+
+			$sql = new SQL();
+			$returnString = $this->fieldName.' BETWEEN '.
+				$sql->escape($arguments[0]).' AND '.$sql->escape($arguments[1]);
+			unset($sql);
+
+			return array('where' => $returnString);
+
+		} elseif (count($arguments) !== 1) {
 			throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument.');
 
 		} elseif (!$this->valueIsValidNative($arguments[0])) {
-			throw new InvalidArgumentException();
+			throw new InvalidArgumentException('\''.$arguments[0].'\' is not a valid arugment.');
 
 		} else {
 			$from = array('!','%','_','[',']');
@@ -447,7 +469,7 @@ class TextField extends StringField {
 					$argument_escaped = $sql->escape('%'.$argument.'%').' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
-				
+
 				default:
 					$argument_escaped = $sql->escape($argument);
 					$operatorString = '=';
