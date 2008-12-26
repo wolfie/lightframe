@@ -165,8 +165,6 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function count() {
-//		echo '{count}';
-
 		if ($this->count >= 0 && !$this->dirty) {
 			return $this->count;
 		} else {
@@ -184,7 +182,6 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function offsetExists($offset) {
-//		echo '{oe:'.$offset.'}';
 		$this->fetch();
 
 		return (isset($this->resultSetModel[$offset])
@@ -192,7 +189,6 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function offsetGet($offset) {
-//		echo '{og:'.$offset.'}';
 		$this->fetch();
 
 		if ($this->offsetExists($offset)) {
@@ -222,26 +218,22 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function current() {
-//		echo '{c}';
 		$this->fetch();
 		return $this->offsetGet($this->iteratorPointer);
 	}
 
 	public function key() {
-//		echo '{k}';
 		$this->fetch();
 		return $this->iteratorPointer;
 	}
 
 	public function next() {
-//		echo '{n}';
 		$this->fetch();
 		$this->iteratorPointer++;
 		return $this->current();
 	}
 
 	public function valid() {
-//		echo '{v}';
 		$this->fetch();
 
 		return(isset($this->resultSetModel[$this->iteratorPointer]) ||
@@ -249,7 +241,6 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function rewind() {
-//		echo '{r}';
 		$this->iteratorPointer = 0;
 		return $this->current();
 	}
