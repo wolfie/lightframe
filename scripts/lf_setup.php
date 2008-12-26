@@ -69,7 +69,7 @@ if (function_exists($option)) {
 	$option($value);
 }
 else {
-	die('Unknown command'."\n\n");
+	die('Unknown command'.PHP_EOL.PHP_EOL);
 }
 
 function setup_help($arg) {
@@ -77,18 +77,18 @@ function setup_help($arg) {
 
 	if (!$arg) {
 		echo
-		'To get more info about a particular command, use "help <command>" as an argument.'."\n\n".
-		'startproject'."\n".
-		'scanserver'."\n".
-		'createdb'."\n".
-		"\n";
+		'To get more info about a particular command, use "help <command>" as an argument.'.PHP_EOL.PHP_EOL.
+		'startproject'.PHP_EOL.
+		'scanserver'.PHP_EOL.
+		'createdb'.PHP_EOL.
+		PHP_EOL;
 	}
 	elseif (function_exists('setup_'.$arg)) {
 		$function = 'setup_'.$arg;
 		echo $function(DISPLAY_HELP);
 	}
 	else {
-		die('No such command'."\n\n");
+		die('No such command'.PHP_EOL.PHP_EOL);
 	}
 }
 
@@ -98,11 +98,11 @@ function setup_startproject($arg) {
 
 	if ($arg === DISPLAY_HELP) {
 		echo 
-		WHITE.'startproject: '.OFF.'copy template files needed for a new LightFrame project'."\n".
-		'usage: '.WHITE.'startproject'.OFF.' [PATH]'."\n".
-		"\n".
-		wordwrap('if PATH is provided, the files will be copied to that path. Otherwise they are copied to the current working path'."\n").
-		"\n";
+		WHITE.'startproject: '.OFF.'copy template files needed for a new LightFrame project'.PHP_EOL.
+		'usage: '.WHITE.'startproject'.OFF.' [PATH]'.PHP_EOL.
+		PHP_EOL.
+		wordwrap('if PATH is provided, the files will be copied to that path. Otherwise they are copied to the current working path'.PHP_EOL).
+		PHP_EOL;
 		die();
 	}
 	
@@ -115,18 +115,18 @@ function setup_startproject($arg) {
 	
 	$templatepath = dirname(__FILE__).'/projectfiles';
 	if (!is_dir($templatepath)) {
-		die('"'.$templatepath.'" is not a directory'."\n");
+		die('"'.$templatepath.'" is not a directory'.PHP_EOL);
 	}
 	
 	chdir($templatepath);
 	_startproject_install(_startproject_findfilesfrom('./'), $path);
 	
-	echo "\n".'new project created!'."\n\n";
+	echo PHP_EOL.'new project created!'.PHP_EOL.PHP_EOL;
 }
 
 function setup_scanserver($arg) {
 	if ($arg === DISPLAY_HELP) {
-		echo 'meh'."\n\n";
+		echo 'meh'.PHP_EOL.PHP_EOL;
 		die();
 	}
 	
@@ -155,18 +155,18 @@ function setup_scanserver($arg) {
 	);
 	
 	foreach ($features as $group => $featureset) {
-		echo $group.":\n";
+		echo $group.':'.PHP_EOL;
 		foreach ($featureset as $setting => $status) {
-			echo '  '.$setting.': ' . ($status ? 'yes' : 'no') . "\n";
+			echo '  '.$setting.': ' . ($status ? 'yes' : 'no') . PHP_EOL;
 		}
-		echo "\n";
+		echo PHP_EOL;
 	}
 	
 	if (!in_array(true, $features['SQL'])) {
-		echo 'The server does not have a supported database engine. LightFrame functionality will be very limited.'."\n";
+		echo 'The server does not have a supported database engine. LightFrame functionality will be very limited.'.PHP_EOL;
 	}
 	
-	echo "\n";
+	echo PHP_EOL;
 }
 
 function setup_createdb($settingsFile) {
@@ -185,37 +185,37 @@ function setup_createdb($settingsFile) {
 	
 	$files = _createdb_findmodelfiles(LF_APPS_PATH);
 	
-	echo WHITE.'Found following model files:'."\n".OFF;
+	echo WHITE.'Found following model files:'.PHP_EOL.OFF;
 	if (count($files) === 0) {
-		die('no model files found'."\n");
+		die('no model files found'.PHP_EOL);
 	}
 	else foreach ($files as $file) {
-		echo $file."\n";
+		echo $file.PHP_EOL;
 		require $file;
 	}
-	echo "\n";
+	echo PHP_EOL;
 	
 	$models = _createdb_findmodels($files);
 	$sql = array();
-	echo WHITE.'Found following models:'."\n".OFF;
+	echo WHITE.'Found following models:'.PHP_EOL.OFF;
 	if (count($models) === 0) {
-		die ('no models found'."\n");
+		die ('no models found'.PHP_EOL);
 	}
 	else foreach ($models as $model) {
-		echo $model."\n";
+		echo $model.PHP_EOL;
 		$model = new $model();
 		$sql[] = $model->_getSQLCreateTable();
 	}
-	echo "\n";
+	echo PHP_EOL;
 	
 	$db = new SQL();
-	echo WHITE.'Running following queries:'."\n".OFF;
+	echo WHITE.'Running following queries:'.PHP_EOL.OFF;
 	foreach ($sql as $query) {
-		echo $query."\n";
+		echo $query.PHP_EOL;
 		$db->query($query);
 	}
 	
-	echo WHITE."\n".'ok'."\n".OFF;
+	echo WHITE.PHP_EOL.'ok'.PHP_EOL.OFF;
 }
 
 
@@ -254,7 +254,7 @@ function _startproject_findfilesfrom($path) {
 	$files = array();
 	
 	if (!is_readable(getcwd().'/'.$path)) {
-		die('directory is not readable: "'.getcwd().'/'.$path.'"'."\n");
+		die('directory is not readable: "'.getcwd().'/'.$path.'"'.PHP_EOL);
 	}
 	
 	foreach (glob($path.'*') as $line) {
@@ -263,7 +263,7 @@ function _startproject_findfilesfrom($path) {
 		}
 		else {
 			if (!is_readable(getcwd().'/'.$line)) {
-				die('can\'t read file "'.getcwd().'/'.$line.'"'."\n");
+				die('can\'t read file "'.getcwd().'/'.$line.'"'.PHP_EOL);
 			}
 			else {
 				$files[] = $line;
@@ -276,11 +276,11 @@ function _startproject_findfilesfrom($path) {
 
 function _startproject_install($filelist, $destination) {
 	if (!is_dir($destination) || !is_writable($destination)) {
-		die('can\'t write to directory "'.$destination.'"'."\n");
+		die('can\'t write to directory "'.$destination.'"'.PHP_EOL);
 	}
 	
 	if (glob($destination.'/*')) {
-		die('"'.$destination.'" is not an empty directory. Can\'t start a new project!'."\n");
+		die('"'.$destination.'" is not an empty directory. Can\'t start a new project!'.PHP_EOL);
 	}
 	
 	foreach($filelist as $file) {
@@ -289,7 +289,7 @@ function _startproject_install($filelist, $destination) {
 			_startproject_install($file, $destination.'/'.substr(dirname($file[0]),2));
 		}
 		else {
-			echo substr($file,2).' > '.$destination."\n";
+			echo substr($file,2).' > '.$destination.PHP_EOL;
 			copy($file, $destination.'/'.basename($file));
 		}
 	}

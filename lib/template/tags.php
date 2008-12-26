@@ -274,7 +274,7 @@ class ForeachTag extends TOM {
 class DebugTag extends TOM {
 	function evaluate() {
 		foreach ($this->args as $arg) {
-			echo $arg.': '."\n";
+			echo $arg.': '.PHP_EOL;
 			var_dump($this->evaluateVariable($arg));
 		}
 		die();

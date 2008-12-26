@@ -267,7 +267,7 @@ function _errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	$args = array();
 
 	if (LF_DEBUG) {
-		$args['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline."\n";
+		$args['message'] = '"'.$errstr.'" in file "'.$errfile.'" on line '.$errline.PHP_EOL;
 	}
 	else {
 		$args['message'] = $errstr;

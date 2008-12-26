@@ -244,8 +244,6 @@ class Template {
 				}
 			}
 			
-			//echo "\n\n****\n\n";
-			//var_dump($this->template);
 			$this->templateNodes = preg_split('/({% .+ %}|{{ .+ }}|{#.*#})/U', $this->template, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 			$this->extend();
 		}
