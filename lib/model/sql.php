@@ -85,6 +85,7 @@ class SQL {
 	public function __construct() {
 		$e = null;
 
+
 		switch (LF_SQL_RDBMS) {
 
 			case 'mysql':
@@ -100,18 +101,25 @@ class SQL {
 				break;
 
 			case 'pgsql':
+
 				if (!function_exists('pg_connect')) {
 					trigger_error('PostgreSQL isn\'t supported by the server\'s PHP');
 				}
-				$db = preg_match('!(?P<host>.*)(:(?<port>[0-9]+))?!', LF_SQL_HOST, $matches);
-				$connect =  'host='.$db['host'].' ';
-				$connect .= isset($db['port']) ? 'port='.$db['port'].' ' : '';
-				$connect .= 'user='.LF_SQL_USER.' ';
-				$connect .= 'pass='.LF_SQL_PASS.' ';
-				$connect .= 'dbname='.LF_SQL_DBNAME;
-				$this->connection = pg_connect($connect);
+
+				if (preg_match('!(?P<host>.*)(:(?<port>[0-9]+))?!', LF_SQL_HOST, $matches) !== 1) {
+					trigger_error('LF_SQL_HOST setting is misformatted (expected \'host\' or \'host:port\').');
+				}
+
+				$connectString =  'host='.$matches['host'].' ';
+				$connectString .= isset($matches['port']) ? 'port='.$matches['port'].' ' : '';
+				$connectString .= 'user='.LF_SQL_USER.' ';
+				$connectString .= 'password='.LF_SQL_PASS.' ';
+				$connectString .= 'dbname='.LF_SQL_DBNAME;
+
+				$this->connection = pg_connect($connectString);
 				$this->version = pg_version();
-				$this->version = $this->version['server_version'];
+				$this->version = isset($this->version['server']) ? $this->version['server'] : 'unknown';
+
 				break;
 
 			case 'sqlite':
@@ -206,11 +214,10 @@ class SQL {
 					throw new QueryErrorException(pg_result_error($tempResult).' - '.$query);
 				}
 
-				while ($this->result[] = $this->result = pg_fetch_assoc($tempResult)) {
-					// empty
+				$this->result = array();
+				while ($row = pg_fetch_assoc($tempResult)) {
+					$this->result[] = $row;
 				}
-
-
 
 				if ($this->result) {
 					$this->rows = pg_num_rows($tempResult);
@@ -350,10 +357,16 @@ class SQL {
 			case 'mysql': return mysql_insert_id($this->connection); break;
 			case 'sqlite': return (int)$this->connection->lastInsertId(); break;
 			case 'pgsql':
-				// currval() seems to do a full sequence scan, circumcode it, compatible for pgsql < 8.2
-				// http://radix.twistedmatrix.com/2007/11/dont-use-postgress-currval.html
-				$id = $this->query('SELECT id FROM '.$tableName.' WHERE id = (SELECT currval(\''.$tableName.'_id_seq\'))');
-				return (int)$id['id'];
+				$result = $this->query('SELECT last_value FROM "'.$tableName.'_id_seq"');
+				$result = $result[0];
+
+				if (!isset($result['last_value']) || !is_numeric($result['last_value'])) {
+					trigger_error('PostgreSQL didn\'t return correct information on sequence "'.$tableName.'_id_seq"');
+				} else {
+					return (int)$result['last_value'];
+				}
+				
+				break;
 			default:
 				trigger_error('getLastID() is not yet implemented for '.LF_SQL_RDBMS);
 		}
