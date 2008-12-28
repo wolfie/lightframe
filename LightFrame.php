@@ -29,7 +29,7 @@ set_error_handler('_errorHandler');
 set_exception_handler('_exceptionHandler');
 
 define ('LF_NAME', 'LightFrame');
-define ('LF_VERSION', 'unfinished');
+define ('LF_VERSION', 'Alpha 1 RC');
 
 $GLOBALS['found'] = false;
 $GLOBALS['context'] = array();
