@@ -59,11 +59,11 @@ abstract class Field {
 	}
 
 	public function set($value) {
-		if ($this->valueIsValidNative($value)) {
+		// Don't make any changes if the value is the same
+		if ($value === $this->value)
+			return;
 
-			// Don't make any changes if the value is the same
-			if ($value === $this->value)
-				return;
+		elseif ($this->valueIsValidNative($value)) {
 
 			$this->value = $value;
 			$this->dirty = true;
