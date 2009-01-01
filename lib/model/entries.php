@@ -129,7 +129,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 			$additives = array(); // Additives are arbitrary commands that can be given to
 			$data      = substr($name, strlen(Entries::KEEP_KEYWORD));
 			$data      = explode(Entries::SUBCRITERIA_SEPARATOR, $data);
-			
+
 			$criterion = array_shift($data).Model::FIELD_OBJECT_SUFFIX; // we want to access the object itself, not only the value
 			$additives = $data;
 
@@ -165,8 +165,6 @@ class Entries implements ArrayAccess, Iterator, Countable {
 				$this->getWhereClause();
 
 			$this->resultSetSQL = $sql->query($query);
-
-		//	var_dump($this->resultSetSQL);die();
 
 			// store a cached size of the count
 			$this->count = count($this->resultSetSQL);
@@ -221,7 +219,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 
 			return (isset($this->resultSetModel[$offset])
 				|| isset($this->resultSetSQL[$offset]));
-			
+
 		} else {
 			return false;
 		}
