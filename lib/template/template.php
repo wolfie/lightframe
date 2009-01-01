@@ -525,13 +525,18 @@ class TOM {
 			
 			
 			foreach ($parts as $part) {
+
+				// It's fair to assume that if a part is strictly numbers, it's an integer
+				if (is_numeric($part)) {
+					$part = (int)$part;
+				}
+
 				// if it's a field, replace it immediately with the real value
 				if ($result instanceof Field) {
 					$result = $result->get();
 				}
 
 				if (is_array($result) || ($result instanceof ArrayAccess && isset($result[$part])) ) {
-
 					if (isset($result[$part])) {
 						$result = $result[$part];
 					} else {
@@ -545,7 +550,18 @@ class TOM {
 
 					} elseif (method_exists($result, $part)
 							|| method_exists($result, '__call')) {
-						$result = $result->$part();
+
+						try {
+							$result = $result->$part();
+						} catch (BadMethodCallException $e) {
+							// __call() didn't support this method
+							$result = null;
+							break;
+						} catch (InvalidArgumentException $e) {
+							// __call() wanted some other arguments
+							$result = null;
+							break;
+						}
 
 					} else {
 						$result = null;
