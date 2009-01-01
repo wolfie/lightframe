@@ -563,7 +563,29 @@ class ManyToOneField extends Field {
 		$wantedFieldName =  $subcriteria[0];
 		$fieldObjectName =  $wantedFieldName.Model::FIELD_OBJECT_SUFFIX;
 
-		if (isset($model->$wantedFieldName)) {
+		// the foreign key is targeted to the model itself. Do a id-to-id comparison
+		if (count($subcriteria) < 2) {
+
+			$id = -1;
+			$argument = $arguments[0];
+
+			if ($argument instanceof Model) {
+				$id = $argument->id;
+			} elseif (is_int($argument)) {
+				$id = $argument;
+			} else {
+				throw new InvalidArgumentException('When filtering by a referring Model, a Model object or its id as an integer is required');
+			}
+
+			if ($id === null || $id < 0) {
+				throw new InvalidArgumentException('The search target was an invalid id value (null or negative)');
+			} else {
+				$whereClause = SQL::toSysId($modelTableName).'.id = '.$id;
+				return array('join' => array($this->fieldName => $modelTableName), 'where' => $whereClause);
+			}
+		}
+
+		elseif (isset($model->$wantedFieldName)) {
 			$passedSubcriteria = $subcriteria;
 			array_shift($passedSubcriteria);
 
@@ -572,7 +594,6 @@ class ManyToOneField extends Field {
 			);
 
 			$criteriaArray = $model->$fieldObjectName->_sqlCriteria($passedSubcriteria, $arguments);
-
 			return array_merge_recursive($baseArray, $criteriaArray);
 		} else {
 			// activate the normal 'not found' message
