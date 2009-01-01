@@ -194,11 +194,14 @@ class Entries implements ArrayAccess, Iterator, Countable {
 		return $joinString;
 	}
 
+	public function __toString() {
+		return '['.get_class($this).': '.$this->modelName.']';
+	}
+
 	public function count() {
 		if ($this->count >= 0 && !$this->dirty) {
 			return $this->count;
 		} else {
-			
 			// otherwise, do a light COUNT(*) query
 			$sql = new SQL();
 			$result = $sql->query('SELECT COUNT(*) FROM '.
@@ -213,10 +216,15 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function offsetExists($offset) {
-		$this->fetch();
+		if (is_int($offset)) {
+			$this->fetch();
 
-		return (isset($this->resultSetModel[$offset])
-			|| isset($this->resultSetSQL[$offset]));
+			return (isset($this->resultSetModel[$offset])
+				|| isset($this->resultSetSQL[$offset]));
+			
+		} else {
+			return false;
+		}
 	}
 
 	public function offsetGet($offset) {
