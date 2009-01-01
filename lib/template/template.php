@@ -530,7 +530,8 @@ class TOM {
 					$result = $result->get();
 				}
 
-				if (is_array($result) || $result instanceof ArrayAccess ) {
+				if (is_array($result) || ($result instanceof ArrayAccess && isset($result[$part])) ) {
+
 					if (isset($result[$part])) {
 						$result = $result[$part];
 					} else {
