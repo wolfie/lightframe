@@ -123,7 +123,7 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	}
 
 	public function  __call($name, $arguments) {
-		// Handle 'keep_where_*' and 'discard_where_*' methods
+		// Handle 'keep_where_*' method
 		if (strpos($name, Entries::KEEP_KEYWORD) === 0) {
 			$criterion = ''; // The Field's name that gets the filter applied to.
 			$additives = array(); // Additives are arbitrary commands that can be given to
