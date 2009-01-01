@@ -81,7 +81,7 @@ function passfile($args) {
 		$args['file'] = $args['context']['file'];
 	}
 	
-	$file = $args['dir'].$args['file'];
+	$file = $args['dir'].'/'.$args['context']['file'];
 	if (!is_readable($file) || !is_file($file)) {
 		if (LF_DEBUG) {
 			trigger_error($file.' not found or not a file');
