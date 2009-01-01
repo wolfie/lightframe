@@ -161,7 +161,6 @@ class Template {
 		}
 		
 		if (!is_file($parentTemplate) || !is_readable($parentTemplate)) {
-			var_dump($matches);
 			trigger_error('invalid template file "'.$file.'"');
 		}
 
