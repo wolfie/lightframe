@@ -93,7 +93,7 @@ else {
 }
 
 if (LF_AUTOFILL_SLASH === true) {
-	if (substr($GLOBALS['URL'],-1) !== '/') {
+	if (substr($GLOBALS['URL'],-1) !== '/' && isset($GLOBALS['URL'][1])) {
 		header('Location: '.LF_SITE_PATH.$GLOBALS['URL'].'/'.($_SERVER['QUERY_STRING'] ? '?'.$_SERVER['QUERY_STRING'] : ''));
 		die();
 	}
