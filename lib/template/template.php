@@ -156,7 +156,9 @@ class Template {
 				$parentTemplate = dirname($this->templateFile).'/'.$file;
 			}
 			else {
-				die('abnormal template location error. If you see this, please report it and how you achieved it to the LightFrame community.');
+				die('abnormal template location error. If you see this, '.
+					'please report it and how you achieved it to the '.
+					'LightFrame community.');
 			}
 		}
 		
