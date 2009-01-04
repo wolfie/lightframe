@@ -194,6 +194,8 @@ abstract class Model {
 			$query .= ' SET '.implode(', ',$updateData);
 			$query .=' WHERE id = '.$this->id;
 
+			return $query;
+
 		} else {
 
 			// There's nothing to change in the DB
