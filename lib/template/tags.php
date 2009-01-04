@@ -56,17 +56,6 @@ class UppercaseTag extends TOM {
 	}
 }
 
-class TransformTag extends TOM {
-	function evaluate() {
-		$this->expectsNodes();
-		parent::evaluate();
-		switch ($this->args[0]) {
-			case 'spacesunderscores': $this->result = strtr($this->result, ' ', '_'); break;
-			default: trigger_error('Unknown argument: '.$this->args[0]); break;
-		}
-	}
-}
-
 class IfTag extends TOM {
 	protected $found = false;
 	

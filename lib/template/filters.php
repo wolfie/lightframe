@@ -88,3 +88,11 @@ function lf_filter_default($string, $arg) {
 function lf_filter_safe($string, $arg) {
 	return htmlspecialchars_decode($string, ENT_QUOTES);
 }
+
+function lf_filter_spaces_to_underscores($string, $arg) {
+	return strtr($string, ' ', '_');
+}
+
+function lf_filter_underscores_to_spaces($string, $arg) {
+	return strtr($string, '_', ' ');
+}
