@@ -281,26 +281,44 @@ class DebugTag extends TOM {
 	}
 }
 
+/**
+ * Returns the amount of elements inside the given variable. Works directly with
+ * arrays and objects that are an instance of Countable.
+ *
+ * If additional two values are given, they are appended after the number. E.g.
+ * - An argument with an array of the size of 1, returns just the string of '1'.
+ * - Arguments with an array of the size of 1, "apple" and "apples",
+ *   the string "1 apple" is returned.
+ * - If the size would be 0 or greater than 1, the return would be something
+ *   like "2 apples".
+ */
 class CountTag extends TOM {
 	private $singular;
 	private $plural;
 	
 	function evaluate() {
 		$e = null;
-		
+
 		parent::evaluate();
 		$this->expectsTag();
 		
-		$var      = $this->evaluateVariable($this->args[0]);
+		$var            = $this->evaluateVariable($this->args[0]);
 		$this->singular = isset($this->args[1]) ? $this->evaluateVariable($this->args[1]) : null;
 		$this->plural   = isset($this->args[2]) ? $this->evaluateVariable($this->args[2]) : null;
-		
-		if (is_array($var)) {
-			$this->result = (string) count($var);
+
+		if (is_array($var) || $var instanceof Countable) {
+			$count = count($var);
+
+			if ($count === 1) {
+				$this->result = $count.$this->conditionalSingular();
+			} else {
+				$this->result = $count.$this->conditionalPlural();
+			}
 			
 		} elseif (is_object($var)) {
 			try {
 				$this->result = $var->count();
+
 				if (!is_numeric($this->result)) {
 					$this->result = '?'.$this->conditionalPlural();
 					
@@ -335,5 +353,15 @@ class CountTag extends TOM {
 		if ($this->singular != null && $this->plural != null) {
 			return ' '.$this->plural;
 		}
+	}
+}
+
+/**
+ * In case the template is just an unextended template with remaining
+ * block-tags, just print out the contents and discard the tags themselves
+ */
+class BlockTag extends TOM {
+	public function evaluate() {
+		parent::evaluate();
 	}
 }
