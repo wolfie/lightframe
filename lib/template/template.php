@@ -141,7 +141,7 @@ class Template {
 		}
 		
 		if ($absolutePath) {
-			if (is_readable(LF_TEMPLATES_PATH.'/'.$file) && is_file(LF_TEMPLATES_PATH.$file)) {
+			if (is_readable(LF_TEMPLATES_PATH.'/'.$file) && is_file(LF_TEMPLATES_PATH.'/'.$file)) {
 				 // Is it a file in the user's files? This also overrides built-in 
 				 // templates and is by design
 				$parentTemplate = LF_TEMPLATES_PATH.'/'.$file;
