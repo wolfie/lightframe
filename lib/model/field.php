@@ -466,22 +466,25 @@ class TextField extends StringField {
 		} else {
 			$from = array('!','%','_','[',']');
 			$to = array('!!','!%','!_','![','!]');
-			$argument = str_replace($from, $to, $arguments[0]);
+			$argument = $arguments[0];
 			$argument_escaped = '';
 			$sql = new SQL();
 
 			switch ($operatorType) {
 				case TextField::STARTS_WITH:
+					$argument = str_replace($from, $to, $argument);
 					$argument_escaped = $sql->escape($argument.'%').' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
 
 				case TextField::ENDS_WITH:
+					$argument = str_replace($from, $to, $argument);
 					$argument_escaped = $sql->escape('%'.$argument).' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
 
 				case TextField::CONTAINS:
+					$argument = str_replace($from, $to, $argument);
 					$argument_escaped = $sql->escape('%'.$argument.'%').' ESCAPE \'!\'';
 					$operatorString = 'LIKE';
 					break;
