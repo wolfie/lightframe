@@ -176,6 +176,8 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	private function getWhereClause() {
 		if (count($this->keep['where']) > 0) {
 			return ' WHERE '.implode(' AND ',$this->keep['where']);
+		} else {
+			return '';
 		}
 	}
 
@@ -202,11 +204,14 @@ class Entries implements ArrayAccess, Iterator, Countable {
 		} else {
 			// otherwise, do a light COUNT(*) query
 			$sql = new SQL();
-			$result = $sql->query('SELECT COUNT(*) FROM '.
+
+			$query = 'SELECT COUNT(*) FROM '.
 				$this->modelObject->_getSQLTableName().
 				$this->getJoinClause().
 				$this->getWhereClause()
-			);
+			;
+
+			$result = $sql->query($query);
 
 			// the answer is wrapped in row and column arrays
 			return (int) current(current($result));
