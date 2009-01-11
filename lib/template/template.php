@@ -580,8 +580,8 @@ class TOM {
 			$result = null;
 		}
 		
-		if (is_string($result)) {
-			$result = htmlspecialchars($result, ENT_QUOTES);
+		if (is_string($result) || is_object($result)) {
+			$result = htmlspecialchars((string)$result, ENT_QUOTES);
 		}
 		
 		if ($filters) {
