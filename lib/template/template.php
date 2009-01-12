@@ -34,7 +34,7 @@ class Template {
 
 	/**
 	 * Template constructor.
-	 * 
+	 *
 	 * @param [optional]mixed $template
 	 * @param [optional]array $context
 	 * @param [optional]bool $builtin search the template from built-in directories
@@ -47,7 +47,7 @@ class Template {
 		$this->templateFile = '';
 		$this->builtin = $builtin;
 		$this->settingsChecked = false;
-		
+
 		if ($this->builtin || (strlen($template) < 100 && strtolower(substr($template, -5)) === '.html')) {
 			$this->templateFile = $template;
 		}
@@ -62,17 +62,17 @@ class Template {
 		else {
 			trigger_error('invalid template argument');
 		}
-		
+
 		// sanitize the template filename
 		if (strpos($this->templateFile, '..') !== false) {
 			trigger_error('Template filename cannot contain ".."');
 		}
-		
-		
+
+
 		if ($this->templateFile[0] === '/') {
 			trigger_error('Template filename cannot start with "/"');
 		}
-		
+
 		// the template is built in. Those templates know what they are doing
 		if ($this->builtin) {
 			if (($file = LF_TEMPLATES_PATH.'/built-in/'.$this->templateFile) && (is_readable($file))) {
@@ -85,7 +85,7 @@ class Template {
 				trigger_error('Built-in template \''.$this->templateFile.'\' not found. Check your installation!');
 			}
 		}
-		
+
 		// assume default template location - [templates]/[app]/[view].html
 		elseif ($this->templateFile === '' && $this->template === '') {
 			if (($file = LF_TEMPLATES_PATH.'/'.$GLOBALS['view'].'.html') && (is_readable($file))) {
@@ -95,38 +95,38 @@ class Template {
 				trigger_error('No template file defined and default template not found in view '.$GLOBALS['view']);
 			}
 		}
-		
+
 		// A defined direct path - [templates]/[arg]
 		elseif (($file = LF_TEMPLATES_PATH.'/'.$this->templateFile) && (is_readable($file))) {
 			$this->templateFile = $file;
 		}
-		
+
 		// Assumed to be under the app's template path - [templates]/[app]/[arg]
 		elseif (($file = LF_TEMPLATES_PATH.'/'.$GLOBALS['app'].'/'.$this->templateFile) && (is_readable($file))) {
 			$this->templateFile = $file;
 		}
-		
+
 		else {
 			trigger_error('Template \''.$this->templateFile.'\' in view \''.$GLOBALS['view'].'\' could not be found');
 		}
 	}
-	
+
 	/**
 	 * Extend the current template if needed
-	 * 
+	 *
 	 * Checks the first line of the TOM, and if the template needs extending it
 	 * scans (top-down) the extending template for block tags and when found,
 	 * it scans the current template for matching tags, and replaces the block
-	 * contents in the extending templates with the contents in the current 
+	 * contents in the extending templates with the contents in the current
 	 * template. If the current template doesn't have a matching block, the contents
 	 * in the extending template is used.
-	 * 
+	 *
 	 */
 	private function extend() {
 		$template = $this->templateNodes;
 		$absolutePath = false;
 		$parentTemplate = null;
-		
+
 		// nothing to extend
 		if (count($template) < 1 || strpos($template[0], '{% extends ') !== 0) {
 			return;
@@ -134,15 +134,15 @@ class Template {
 
 		preg_match('!{% extends "([^"]+)"!', array_shift($template), $matches);
 		$file = $matches[1];
-		
+
 		if ($file[0] === '/') {
 			$absolutePath = true;
 			$file = substr($file, 1);
 		}
-		
+
 		if ($absolutePath) {
 			if (is_readable(LF_TEMPLATES_PATH.'/'.$file) && is_file(LF_TEMPLATES_PATH.'/'.$file)) {
-				 // Is it a file in the user's files? This also overrides built-in 
+				 // Is it a file in the user's files? This also overrides built-in
 				 // templates and is by design
 				$parentTemplate = LF_TEMPLATES_PATH.'/'.$file;
 			}
@@ -161,7 +161,7 @@ class Template {
 					'LightFrame community.');
 			}
 		}
-		
+
 		if (!is_file($parentTemplate) || !is_readable($parentTemplate)) {
 			trigger_error('invalid template file "'.$file.'"');
 		}
@@ -171,7 +171,7 @@ class Template {
 		$resultTemplate = array();
 		$pSize = count($parentTemplate);
 		$cSize = count($template);
-		
+
 		/*
 		 * Seek the parent template for blocks and their names. Replace the block
 		 * in the parent template with the corresponding block from the current
@@ -180,43 +180,43 @@ class Template {
 		 */
 		for ($i = 0; $i < $pSize; $i++) {
 			$pNode = $parentTemplate[$i];
-			
+
 			if (strpos($pNode, '{% block ') === false) {
 				$resultTemplate[] = $pNode;
 			}
-			
+
 			else {
 				preg_match('!{% block (.+) %}!', $pNode, $matches); // no syntax checking here
 				$block = $matches[1];
 				$found = false;
 				//$tSize = count($template);
-				
+
 				for ($j=0; $j < $cSize; $j++) {
 					$cNode = $template[$j];
-					
+
 					if ($cNode !== '{% block '.$block.' %}') {
 						continue;
 					}
-					
+
 					$found = true;
 
 					// copy the contents of the current template in the result template until {% endblock %}
 					while($j < $cSize-1 && strpos($template[$j+1], '{% endblock ') !== 0) {
 						$resultTemplate[] = $template[++$j];
 					}
-					
+
 					// If we hit the end of the file before finding an appropriate endblock
 					if ($j+1 === $cSize) {
 						trigger_error('An uneven count of blocks/endblocks!');
 					}
-					
+
 					// scroll the parent template to the next endblock
 					do {
 						$i++;
 					}
 					while (strpos($parentTemplate[$i], '{% endblock ') !== 0);
 				}
-				
+
 				// the block was not found in the current template, copy the parent template's contents
 				if (!$found) {
 					while ($i<$pSize-1 && strpos($parentTemplate[$i+1], '{% endblock ') === false) {
@@ -229,7 +229,7 @@ class Template {
 
 		$this->templateNodes = $resultTemplate;
 	}
-	
+
 	/**
 	 * Break the template file into elements of text, tags, variables and comments
 	 * and extend the template afterwards.
@@ -239,17 +239,17 @@ class Template {
 		if (count($this->templateNodes) === 0) {
 			if (!$this->template) {
 				$this->template = file_get_contents($this->templateFile);
-				
+
 				if ($this->template === false) {
 					var_dump($this->templateFile);die();
 				}
 			}
-			
+
 			$this->templateNodes = preg_split('/({% .+ %}|{{ .+ }}|{#.*#})/U', $this->template, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 			$this->extend();
 		}
 	}
-	
+
 	/**
 	 * Evaluate the tags (and the variables within)
 	 *
@@ -260,7 +260,7 @@ class Template {
 			$this->html = (string) new TOM($this->templateNodes, $this->context);
 		}
 	}
-	
+
 	/**
 	 * Return the contents of the template file
 	 *
@@ -270,7 +270,7 @@ class Template {
 		$this->renderNodes();
 		return $this->template;
 	}
-	
+
 	/**
 	 * Return the broken-apart and evaluated template elements
 	 *
@@ -280,7 +280,7 @@ class Template {
 		$this->renderNodes();
 		return $this->templateNodes;
 	}
-	
+
 	/**
 	 * Make the template into a HTML document
 	 *
@@ -296,7 +296,7 @@ class Template {
  * Template Object Model
  *
  * This acts as a basis for Tags
- * 
+ *
  */
 class TOM {
 	protected $nodes;
@@ -304,7 +304,7 @@ class TOM {
 	protected $context;
 	protected $args;
 	protected $arg;
-	
+
 	/**
 	 * Construct the TOM and parse arguments, if they exist. Finally evaluate
 	 * the TOM nodes
@@ -318,32 +318,32 @@ class TOM {
 		$this->result = '';
 		$this->context = $context;
 		$this->arg = $args;
-		
+
 		$arguments = array();
-		
+
 		// parse arguments into an array
 		if ($args !== '') {
-			
+
 			/*
 			 * Replace each quoted (thus possibly spaced) argument with a unique
 			 * identifier (microtime + some id), remember the translations, and finally
 			 * apply them back to the actual values.
 			 */
-			
+
 			preg_match_all('/ ?(.+:)?(?<val>".+")/U', $args, $matches);
-			
+
 			$dict = array();
 			foreach ($matches['val'] as $value) {
 				$dict['"'.microtime(true).uniqid(true).'"'] = $value;
 			}
-			
+
 			$args = str_replace($dict, array_flip($dict), $args);
 
 			foreach (explode(' ', trim($args)) as $i => $arg) {
 				$temp = explode(':', $arg, 2);
 				$argname = $temp[0];
 				$argvalue = isset($temp[1]) ? $temp[1] : true;
-				
+
 				if ($argvalue !== true) {
 					$arguments[$argname] = isset($dict[$argvalue]) ? $dict[$argvalue] : $argvalue;
 					$arguments[$i] = $arguments[$argname];
@@ -353,12 +353,12 @@ class TOM {
 				}
 			}
 		}
-		
+
 		$this->args = $arguments;
-		
+
 		$this->evaluate();
 	}
-	
+
 	/**
 	 * return $this->result as string
 	 *
@@ -367,14 +367,14 @@ class TOM {
 	final function __toString() {
 		return (string)$this->result;
 	}
-	
+
 	/**
 	 * Process one step of nodes
-	 * 
+	 *
 	 * One step can include a plaintext string (returns it as-is), a comment
 	 * (returns blank), variable (evaluates the variable and filters) or
 	 * a tag (does one of two things, see TOM::evaluateTag()).
-	 * 
+	 *
 	 * @return string
 	 */
 	final protected function step() {
@@ -384,7 +384,7 @@ class TOM {
 		}
 
 		$node = array_shift($this->nodes);
-		
+
 		/*
 		 * as false and '' equal loosely (==) the stepping process requires a '!== false'.
 		 * TODO: Make a easy-to-use wrapper so that comparison errors are avoided in
@@ -392,14 +392,14 @@ class TOM {
 		 */
 		// the node is a comment, return blank
 		if (strpos($node, '{#') !== false) {
-			return '';	
+			return '';
 		}
-		
+
 		// the node is a variable, evaluate it
 		elseif (strpos($node, '{{ ') !== false) {
 			return $this->evaluateVariable(substr($node, 3, -3));
 		}
-		
+
 		// the node is a tag
 		elseif (strpos($node, '{% ') !== false) {
 			$return = $this->evaluateTag($node);
@@ -409,7 +409,7 @@ class TOM {
 			return $node;
 		}
 	}
-	
+
 	/**
 	 * Seek for an ending pair. If there is none, it's a
 	 * simple tag, and is processed along with the arguments. Otherwise it's
@@ -424,12 +424,12 @@ class TOM {
 		$tag = $matches['tag'];
 		$args = $matches['args'];
 		$endtag = '{% end'.$tag.' %}';
-		
+
 		$tempNodes = array();
 		$argNodes = array();
 		//$arguments = array();
 		$nests = 0;
-		
+
 		// try to seek the end pair.
 		foreach ($this->nodes as $n) {
 			if (strpos($n, '{% '.$tag) === 0) {
@@ -444,14 +444,14 @@ class TOM {
 			}
 			$tempNodes[] = $n;
 		}
-		
+
 		$anCount = count($argNodes);
-		
+
 		// No endtag found, it's a simple tag
 		if ($anCount === 0) {
 			$argNodes = $node;
 		}
-		
+
 		// it's a block - scroll over it
 		else {
 			for ($i=0; $i <= $anCount; $i++) {
@@ -459,22 +459,22 @@ class TOM {
 			}
 		}
 
-		
+
 		$class = ucfirst($tag).'Tag';
 		if (!class_exists($class, false)) {
 			//var_dump($this->nodes);die();
 			trigger_error($tag.' is not a valid tag');
 		}
 
-		return (string) new $class($argNodes, &$this->context, $args);	
+		return (string) new $class($argNodes, &$this->context, $args);
 	}
-	
+
 	/**
 	 * Evaluate a variable into a string
-	 * 
+	 *
 	 * Separates filters from the variable itself. If the variable contains periods,
 	 * it's considered 'multipart', meaning it is either an array or object.
-	 * 
+	 *
 	 * format: partA.partB|filter1:arg1|filter2
 	 *
 	 * @param string $var
@@ -485,7 +485,7 @@ class TOM {
 		$result = array_shift($var);
 		$filters = $var;
 		$e = null;
-		
+
 		// it's a numeral
 		if (is_numeric($result)) {
 			$result = (int)$result;
@@ -496,12 +496,12 @@ class TOM {
 		        ($result[0] === '"'  && $result[(strlen($result)-1)] === '"')) {
 			$result = substr($result, 1, -1);
 		}
-		
+
 		// it's an index within the context
 		elseif (isset($this->context[$result])) {
 			$result = $this->context[$result];
 		}
-		
+
 		// multipart
 		elseif (count($parts = explode('.', $result)) > 1) {
 			$result = array_shift($parts);
@@ -524,8 +524,8 @@ class TOM {
 			else {
 				$result = null;
 			}
-			
-			
+
+
 			foreach ($parts as $part) {
 
 				// It's fair to assume that if a part is strictly numbers, it's an integer
@@ -579,11 +579,11 @@ class TOM {
 		else {
 			$result = null;
 		}
-		
+
 		if (is_string($result) || is_object($result)) {
 			$result = htmlspecialchars((string)$result, ENT_QUOTES);
 		}
-		
+
 		if ($filters) {
 			foreach ($filters as $filter) {
 				$data = explode(':',$filter,2);
@@ -596,7 +596,7 @@ class TOM {
 				else {
 					$value = false;
 				}
-				
+
 				$function = 'lf_filter_'.strtolower($filter);
 				if (!function_exists($function)) {
 					trigger_error('"'.$filter.'" is not a valid filter');
@@ -604,10 +604,10 @@ class TOM {
 				$result = $function((string)$result, $value);
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Trigger an error if the Tag doens't have nodes
 	 *
@@ -617,7 +617,7 @@ class TOM {
 			trigger_error(get_class($this).' expects nodes as an argument');
 		}
 	}
-	
+
 	/**
 	 * Trigger an error if the Tag contains nodes
 	 *
@@ -629,15 +629,15 @@ class TOM {
 	}
 
 	/**
-	 * The default evaluation method 
-	 * 
+	 * The default evaluation method
+	 *
 	 * scroll over the nodes and evaluate all variables and tags. Many tags
 	 * take usage of this by calling parent::evaluate() and then manipulates the
 	 * result in $this->result.
-	 * 
+	 *
 	 * The result of the tag must be stored in $this->result
-	 * 
-	 */ 
+	 *
+	 */
 	public function evaluate() {
 		while (($step = $this->step()) !== false) {
 			$this->result .= $step;
