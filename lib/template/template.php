@@ -397,7 +397,14 @@ class TOM {
 
 		// the node is a variable, evaluate it
 		elseif (strpos($node, '{{ ') !== false) {
-			return $this->evaluateVariable(substr($node, 3, -3));
+			$evaluated = $this->evaluateVariable(substr($node, 3, -3));
+
+			// make sure that objects' __toString() methods are also html-escaped
+			if (is_object($evaluated)) {
+				$evaluated = htmlentities($evaluated, ENT_QUOTES);
+			}
+
+			return $evaluated;
 		}
 
 		// the node is a tag
@@ -580,7 +587,7 @@ class TOM {
 			$result = null;
 		}
 
-		if (is_string($result) || is_object($result)) {
+		if (is_string($result)) {
 			$result = htmlspecialchars((string)$result, ENT_QUOTES);
 		}
 
