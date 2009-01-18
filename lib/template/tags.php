@@ -354,3 +354,9 @@ class BlockTag extends TOM {
 		parent::evaluate();
 	}
 }
+
+class VerbatimTag extends TOM {
+	public function evaluate() {
+		$this->result = implode('', $this->nodes);
+	}
+}
