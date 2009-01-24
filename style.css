@@ -1,0 +1,40 @@
+html {
+	background-color: silver;
+}
+
+body {
+	position: relative;
+	left: 50%;
+	
+	font-family: "Helvetica", "Verdana", sans-serif;
+	width: 600px;
+	background-color: white;
+	margin: 10px 0 100px -300px;
+	padding: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: "Georgia", serif;
+}
+
+p {
+	text-align: justify;
+	line-height: 150%;
+}
+
+h1 {
+	text-align: center;
+	border-bottom: 2px solid black;
+	margin-left: 50px;
+	margin-right: 50px;
+}
+
+h2 {
+	font-size: 1.5em;
+	margin-left: 1em;
+	margin-top: 2em;
+}
+
+a {
+	color: #555;
+}
