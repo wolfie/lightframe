@@ -65,8 +65,13 @@ if (LF_APACHE_MODREWRITE === false) {
 	
 	// $_SERVER[QUERY_STRING] contains an unnecessary argument
 	$qstring = explode('?', $_SERVER['REQUEST_URI'], 3);
-	$GLOBALS['URL'] = $qstring[1];
-	$_SERVER['QUERY_STRING'] = (isset($qstring[2]) ? $qstring[2] : '');
+
+	if (isset($qstring[1])) {
+		$GLOBALS['URL'] = $qstring[1];
+		$_SERVER['QUERY_STRING'] = (isset($qstring[2]) ? $qstring[2] : '');
+	} else {
+		trigger_error('Apache seems to have mod_rewrite enabled, but the configuration has it turned off. Please change your settings.');
+	}
 }
 
 // entire $_GET is garbled if mod rewrite is enabled, reconstruct it
