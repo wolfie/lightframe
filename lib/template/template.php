@@ -509,6 +509,10 @@ class TOM {
 			$result = $this->context[$result];
 		}
 
+		elseif ($result === '/') {
+			$result = $GLOBALS['env']['site_path'];
+		}
+
 		// multipart
 		elseif (count($parts = explode('.', $result)) > 1) {
 			$result = array_shift($parts);
