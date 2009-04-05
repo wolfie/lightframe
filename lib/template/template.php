@@ -239,10 +239,6 @@ class Template {
 		if (count($this->templateNodes) === 0) {
 			if (!$this->template) {
 				$this->template = file_get_contents($this->templateFile);
-
-				if ($this->template === false) {
-					var_dump($this->templateFile);die();
-				}
 			}
 
 			$this->templateNodes = preg_split('/({% .+ %}|{{ .+ }}|{#.*#})/U', $this->template, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
@@ -469,7 +465,6 @@ class TOM {
 
 		$class = ucfirst($tag).'Tag';
 		if (!class_exists($class, false)) {
-			//var_dump($this->nodes);die();
 			trigger_error($tag.' is not a valid tag');
 		}
 
