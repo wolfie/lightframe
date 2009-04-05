@@ -169,8 +169,10 @@ class Template {
 		$parentTemplate = new Template(file_get_contents($parentTemplate));
 		$parentTemplate = $parentTemplate->getNodes();
 		$resultTemplate = array();
-		$pSize = count($parentTemplate);
-		$cSize = count($template);
+		$parentSize = count($parentTemplate);
+		$currentSize = count($template);
+
+		var_dump($this->templateNodes);$die();
 
 		/*
 		 * Seek the parent template for blocks and their names. Replace the block
@@ -178,7 +180,7 @@ class Template {
 		 * template. If no such block is found in the current template, remove the
 		 * tags in the parent tags, and use the default content.
 		 */
-		for ($i = 0; $i < $pSize; $i++) {
+		for ($i = 0; $i < $parentSize; $i++) {
 			$pNode = $parentTemplate[$i];
 
 			if (strpos($pNode, '{% block ') === false) {
@@ -191,7 +193,7 @@ class Template {
 				$found = false;
 				//$tSize = count($template);
 
-				for ($j=0; $j < $cSize; $j++) {
+				for ($j=0; $j < $currentSize; $j++) {
 					$cNode = $template[$j];
 
 					if ($cNode !== '{% block '.$block.' %}') {
@@ -201,12 +203,12 @@ class Template {
 					$found = true;
 
 					// copy the contents of the current template in the result template until {% endblock %}
-					while($j < $cSize-1 && strpos($template[$j+1], '{% endblock ') !== 0) {
+					while($j < $currentSize-1 && strpos($template[$j+1], '{% endblock ') !== 0) {
 						$resultTemplate[] = $template[++$j];
 					}
 
 					// If we hit the end of the file before finding an appropriate endblock
-					if ($j+1 === $cSize) {
+					if ($j+1 === $currentSize) {
 						trigger_error('An uneven count of blocks/endblocks!');
 					}
 
@@ -219,7 +221,7 @@ class Template {
 
 				// the block was not found in the current template, copy the parent template's contents
 				if (!$found) {
-					while ($i<$pSize-1 && strpos($parentTemplate[$i+1], '{% endblock ') === false) {
+					while ($i<$parentSize-1 && strpos($parentTemplate[$i+1], '{% endblock ') === false) {
 						$resultTemplate[] = $parentTemplate[++$i];
 					}
 					$i++;
