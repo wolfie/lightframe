@@ -189,9 +189,9 @@ class Template {
 			elseif ($verbatimDepth > 0
 					&& (strpos($node, '{% block ') === 0
 						|| strpos($node, '{% endblock ') === 0)) {
-				$uniqid = uniqid(md5(time()), true);
+				$uniqid = '[['.uniqid(md5(time()), true).']]';
 				$escapeMap[$uniqid] = $node;
-				$template[$row] = '[['.$uniqid.']]';
+				$template[$row] = $uniqid;
 			}
 		}
 
@@ -257,8 +257,6 @@ class Template {
 			$originalString = current($escapeMap);
 			$hash = key($escapeMap);
 			unset($escapeMap[$hash]);
-
-			$hash = '[['.$hash.']]';
 
 			foreach ($resultTemplate as $row => $node) {
 				if ($node === $hash) {
