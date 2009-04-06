@@ -172,7 +172,28 @@ class Template {
 		$parentSize = count($parentTemplate);
 		$currentSize = count($template);
 
-		var_dump($this->templateNodes);$die();
+		/*
+		 * Scan the template for verbatim-tags. block-tags inside these need to be
+		 * escaped.
+		 */
+
+		$escapeMap = array();
+		$verbatimDepth = 0;   
+		foreach ($template as $row => $node) {
+			if ($node === '{% verbatim %}') {
+				$verbatimDepth++;
+			} elseif ($node === '{% endverbatim %}') {
+				$verbatimDepth--;
+			}
+			
+			elseif ($verbatimDepth > 0
+					&& (strpos($node, '{% block ') === 0
+						|| strpos($node, '{% endblock ') === 0)) {
+				$uniqid = uniqid(md5(time()), true);
+				$escapeMap[$uniqid] = $node;
+				$template[$row] = '[['.$uniqid.']]';
+			}
+		}
 
 		/*
 		 * Seek the parent template for blocks and their names. Replace the block
@@ -225,6 +246,23 @@ class Template {
 						$resultTemplate[] = $parentTemplate[++$i];
 					}
 					$i++;
+				}
+			}
+		}
+
+		/*
+		 * Replace back the blocks that we hid
+		 */
+		while (count($escapeMap) > 0) {
+			$originalString = current($escapeMap);
+			$hash = key($escapeMap);
+			unset($escapeMap[$hash]);
+
+			$hash = '[['.$hash.']]';
+
+			foreach ($resultTemplate as $row => $node) {
+				if ($node === $hash) {
+					$resultTemplate[$row] = $originalString;
 				}
 			}
 		}
