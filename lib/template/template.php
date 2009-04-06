@@ -653,8 +653,8 @@ class TOM {
 	}
 
 	/**
-	 * Trigger an error if the Tag doens't have nodes
-	 *
+	 * Marks that the Tag expects nodes (a block tag) and triggers an error, if
+	 * it receives a single tag.
 	 */
 	final protected function expectsNodes() {
 		if (!is_array($this->nodes)) {
@@ -663,8 +663,8 @@ class TOM {
 	}
 
 	/**
-	 * Trigger an error if the Tag contains nodes
-	 *
+	 * Marks that the Tag expects a tag (a simple tag) and triggers an error, if
+	 * it receives a block of nodes.
 	 */
 	final protected function expectsTag() {
 		if (!is_string($this->nodes)) {

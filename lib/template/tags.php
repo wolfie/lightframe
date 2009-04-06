@@ -262,6 +262,7 @@ class ForeachTag extends TOM {
 
 class DebugTag extends TOM {
 	function evaluate() {
+		$this->expectsTag();
 		foreach ($this->args as $arg) {
 			echo $arg.': '.PHP_EOL;
 			var_dump($this->evaluateVariable($arg));
@@ -351,12 +352,14 @@ class CountTag extends TOM {
  */
 class BlockTag extends TOM {
 	public function evaluate() {
+		$this->expectsNodes();
 		parent::evaluate();
 	}
 }
 
 class VerbatimTag extends TOM {
 	public function evaluate() {
+		$this->expectsNodes();
 		$this->result = implode('', $this->nodes);
 	}
 }
