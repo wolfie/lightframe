@@ -341,12 +341,6 @@ abstract class Model {
 			return $this->_cachedTableName;
 		}
 
-		// TODO: Ticket #112
-		//		elseif (isset($this->_control[Model::TABLE_NAME])) {
-		//			$this->_cachedTableName = $this->getUniquePrefix().((string)$this->control['table_name']);
-		//		}
-
-
 		// Warning: this might lead to wonky results if $appName contains non-ASCII
 		// characters
 		else {
