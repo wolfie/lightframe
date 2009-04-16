@@ -398,40 +398,6 @@ abstract class Model {
 		}
 	}
 
-
-	//	final private function getSQLColumns($omitId = false, $asArray = false) {
-	//		$tableName = $this->getSQLTableName();
-	//		$result = "";
-	//
-	//		if (!$omitId) {
-	//			if ($asArray) {
-	//				$result = array(SQL::toSysId($tableName).
-	//					'.'.SQL::toSysId('id'));
-	//			} else {
-	//				$result = SQL::toSysId($tableName).
-	//					'.'.SQL::toSysId('id').
-	//					' AS '.SQL::toSysId($tableName.'_id');
-	//			}
-	//		}
-	//
-	//		foreach (array_keys($this->_fields) as $key) {
-	//			if ($asArray) {
-	//				$result[] = SQL::toSysId($tableName).'.'.SQL::toSysId($key);
-	//			} else {
-	//				$result .= ", ".SQL::toSysId($tableName).'.'.SQL::toSysId($key).
-	//					' AS '.SQL::toSysId($tableName.'_'.$key);
-	//			}
-	//		}
-	//
-	//		if (!$asArray && $omitId) {
-	//			// if the result is a string, and the id was omitted, remove the
-	//			// initial comma and space
-	//			$result = substr($result, 2);
-	//		}
-	//
-	//		return $result;
-	//	}
-
 	/**
 	 * Empty all fields the Model has, and reset id to null
 	 */
