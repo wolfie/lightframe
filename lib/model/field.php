@@ -371,7 +371,7 @@ class IntField extends NumberField {
 				throw new InvalidArgumentException();
 			}
 
-			return $this->fieldName.' '.$operatorString.' '.$arguments[0].' AND '.$arguments[1];
+			return array('where' => $this->fieldName.' '.$operatorString.' '.$arguments[0].' AND '.$arguments[1]);
 		} else {
 			if (count($arguments) !== 1) {
 				throw new InvalidArgumentException('\''.$operator.'\' requires exactly one argument');
