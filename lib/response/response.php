@@ -178,11 +178,39 @@ class Response {
  * HTTP header abstraction
  */
 class HTTPHeaders {
+	/**
+	 * The requested resource could not be found but may be available again in the
+	 * future. Subsequent requests by the client are permissible.
+	 */
 	const NOT_FOUND = 404;
+
+	/**
+	 * A generic error message, given when no more specific message is suitable.
+	 */
 	const INTERNAL_ERROR = 500;
+
+	/** This and all future requests should be directed to the given URI. */
 	const MOVED = 301;
-	const REDIRECT = 302;
+
+	/**
+	 * The response to the request can be found under another URI using a GET
+	 * method. When received in response to a PUT, it should be assumed that the
+	 * server has received the data and the redirect should be issued with a
+	 * separate GET message.
+	 */
+	const SEE_OTHER = 303;
+
+	/**
+	 * The request was a legal request, but the server is refusing to respond to
+	 * it. Unlike a 401 Unauthorized response, authenticating will make no
+	 * difference.
+	 */
 	const FORBIDDEN = 403;
+
+	/**
+	 * Similar to 403 Forbidden, but specifically for use when authentication is
+	 * possible but has failed or not yet been provided.
+	 */
 	const UNAUTHORIZED = 401;
 	
 	private $status = '';
@@ -244,8 +272,8 @@ class HTTPHeaders {
 		switch($status) {
 			case HTTPHeaders::NOT_FOUND: $s .= $status.' Not Found'; break;
 			case HTTPHeaders::INTERNAL_ERROR: $s .= $status.' Internal Error'; break; 
-			case HTTPHeaders::MOVED: $s .= $status. ' Moved'; break;
-			case HTTPHeaders::REDIRECT: $s .= $status. ' Redirect'; break;
+			case HTTPHeaders::MOVED: $s .= $status. ' Moved Permanently'; break;
+			case HTTPHeaders::SEE_OTHER: $s .= $status. ' See Other'; break;
 			default: '200 OK';
 		}
 		$this->status = $s;

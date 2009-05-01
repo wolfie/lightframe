@@ -48,7 +48,7 @@ function redirect($args) {
 	
 	require_once(LF_LIGHTFRAME_PATH.'/lib/response/response.php');
 	$headers = new HTTPHeaders();
-	$headers->status = HTTPHeaders::MOVED;
+	$headers->status = HTTPHeaders::SEE_OTHER;
 	$headers->Location = $args['url'];
 	$headers->send();
 	die();
