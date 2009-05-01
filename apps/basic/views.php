@@ -64,24 +64,28 @@ function redirect($args) {
 function passfile($args) {
 	$mime = null;
 	$e = null;
+	$filename = '';
+	$dirname = '';
 
 	try {
 		_requireArgument(__FUNCTION__,'dir',$args);
+		$dirname = $args['dir'];
 	}
 	catch (Exception $e) {
-		_requireArgument(__FUNCTION__,'file',$args['context']);
-		$args['dir'] = $args['context']['dir'];
+		_requireArgument(__FUNCTION__,'dir',$args['context']);
+		$dirname = $args['context']['dir'];
 	}
 	
 	try {
 		_requireArgument(__FUNCTION__,'file',$args);
+		$filename = $args['file'];
 	}
 	catch (Exception $e) {
 		_requireArgument(__FUNCTION__,'file',$args['context']);
-		$args['file'] = $args['context']['file'];
+		$filename = $args['context']['file'];
 	}
-	
-	$file = $args['dir'].'/'.$args['context']['file'];
+
+	$file = $dirname.'/'.$filename;
 	if (!is_readable($file) || !is_file($file)) {
 		if (LF_DEBUG) {
 			trigger_error($file.' not found or not a file');
@@ -184,7 +188,7 @@ function passfile($args) {
  * @param string $arg required argument
  * @param &array $args an array to search
  */
-function _requireArgument($function,$arg,&$args) {
+function _requireArgument($function, $arg, array &$args) {
 	if (!isset($args[$arg])) {
 		throw new Exception($function.' view requries \''.$arg.'\' argument');
 	}
