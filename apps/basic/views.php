@@ -85,6 +85,10 @@ function passfile($args) {
 		$filename = $args['context']['file'];
 	}
 
+	if (strpos($filename, '..') !== false || strpos($filename, '/') !== false) {
+		throw new Exception('file-argument contains illegal characters');
+	}
+
 	$file = $dirname.'/'.$filename;
 	if (!is_readable($file) || !is_file($file)) {
 		if (LF_DEBUG) {
