@@ -252,13 +252,14 @@ function _callView($view, $args=array()) {
 			session_name(LF_SESSION_NAME);
 			session_start();
 		}
-		
+
+		/* @var $result Response */
 		$result = $GLOBALS['viewfunc']($args);
-		
 		if (!($result instanceof Response)) {
 			trigger_error('View \''.$GLOBALS['view'].'\' needs to return a Response object');
 		}
-		return $result->commit();
+		
+		return $result->_commit();
 		
 /*		// 
 		if (LF_SESSION_ENABLE && session_id() !== '') {

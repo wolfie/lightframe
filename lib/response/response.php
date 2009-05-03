@@ -156,7 +156,7 @@ class Response {
 	 * Respond to the client.
 	 *
 	 */
-	function commit() {
+	function _commit() {
 		// for future references: headers_list() catches all headers to be sent.
 		if ($this->body === null && !$this->template) {
 			trigger_error('Template was not defined and body was not defined.');
