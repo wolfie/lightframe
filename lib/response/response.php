@@ -75,14 +75,14 @@ class Response {
 	/**
 	 * Add to html body
 	 *
-	 * @param string $string
+	 * @param string $html
 	 * @throws LightFrameException
 	 */
-	function add($string) {
+	function add($html) {
 		if ($this->isRedirected) {
 			throw new LightFrameException("Can't modify body anymore, response is set to redirect");
 		}
-		$this->body .= $string;
+		$this->body .= $html;
 	}
 	
 	/**
