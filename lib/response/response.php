@@ -125,6 +125,10 @@ class Response {
 	 * @throws LightFrameException
 	 */
 	function context($context = false) {
+		if ($context !== false && !is_array($context)) {
+			throw new LightFrameException("The new context must be an array");
+		}
+
 		$temp = $this->context;
 		if ($context !== false) {
 			if ($this->isRedirected) {
