@@ -37,7 +37,6 @@ define ('LF_AUTOFILL_SLASH', false); // add a slash at the end of the url, if it
  * Apache
  */
 
-// This will be probably deprecated in favor of a apache_get_modules() workaround check (if necessary at all)
 define ('LF_APACHE_MODREWRITE', false); // Whether MOD_REWRITE is supported or not
 define ('LF_DEFAULT_CHARSET', 'utf-8'); // The default charset
 define ('LF_DEFAULT_CONTENT_TYPE', 'text/html; charset='.LF_DEFAULT_CHARSET); // the default content type (change to "application/xhtml+xml" for XHTML files)
@@ -49,12 +48,9 @@ define ('LF_DEFAULT_CONTENT_TYPE', 'text/html; charset='.LF_DEFAULT_CHARSET); //
 define ('LF_SESSION_ENABLE', true); // use sessions?
 define ('LF_SESSION_NAME', 'LightFrame'); // the name to use in the session cookie, if sessions are used
 
-
 /*
  * Security
  */
 
-// not yet used. Might be created dynamically by lf_setup.php
-#define ('LF_CRYPTO_SALT', ''); // use a unique and random string to salt password hashes
 define ('LF_DEBUG', true); // turn debug on or off
 define ('LF_EXPOSE_LIGHTFRAME', true); // show LightFrame in HTTP response header?
