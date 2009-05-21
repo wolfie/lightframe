@@ -37,7 +37,6 @@ class Response {
 	private $body = null;
 	private $template = '';
 	private $context = array();
-	private $private = false;
 	private $isRedirected = false;
 	
 	/**
