@@ -360,7 +360,7 @@ class SQL {
 // in case the sql is not used from LightFrame.php
 if (!function_exists('_errorHandler')) {
 	function _simpleErrorHandler($errno, $errstr, $errfile, $errline) {
-		die('($errno) $errstr at $errfile:$errline'.PHP_EOL);
+		die("($errno) $errstr at $errfile:$errline".PHP_EOL);
 	}
 	set_error_handler('_simpleErrorHandler');
 }
