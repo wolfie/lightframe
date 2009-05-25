@@ -501,9 +501,9 @@ class TextField extends StringField {
 
 class ManyToOneField extends Field {
 	/**
-	 * @var Model
+	 * @var string
 	 */
-	private $referenceModel = null;
+	private $referenceModelClass;
 
 	public function __construct($reference) {
 		if (!is_string($reference) || !class_exists($reference)) {
@@ -512,19 +512,11 @@ class ManyToOneField extends Field {
 			);
 		}
 
-		$model = new $reference();
-
-		if (!($model instanceof Model)) {
-			throw new LightFrameException(get_class($this).
-				' expects a Model class\' name as a constructor argument'
-			);
-		}
-
-		$this->referenceModel = $model;
+		$this->referenceModelClass = $reference;
 	}
 
 	public function valueIsValidNative($value) {
-		return (is_object($value) && $value instanceof $this->referenceModel);
+		return (is_object($value) && $value instanceof $this->referenceModelClass);
 	}
 
 	public function valueIsValidSQL($value) {
@@ -534,37 +526,42 @@ class ManyToOneField extends Field {
 
 	public function inflate() {
 		$value = (int)$this->value;
-		$this->value = clone $this->referenceModel;
+		$this->value = $this->getReferenceModel();
 		$this->value->load($value);
 
-		if ($this->value->id !== $value) {
+		if ($this->value->id === $value) {
+			$this->inflated = true;
+		} else {
 			// reset the value
 			$this->value = $value;
 			$this->inflated = false;
 
 			throw new LightFrameException('Could not inflate '.
 				get_class($this).'(\''.
-				get_class($this->referenceModel).'\') with id '.$value
+				$this->referenceModelClass.'\') with id '.$value
 			);
-		} else {
-			$this->inflated = true;
 		}
 	}
 
 	public function deflate() {
-		// before trying to deflate, save it to the database
-		if ($this->isInflated() && $this->value->_isDirty()) {
-			$this->value->save();
+		if (is_object($this->value)) {
+			// before trying to deflate, save it to the database
+			if ($this->isInflated() && $this->value->_isDirty()) {
+				$this->value->save();
+			}
+			return (string) $this->value->id;
 		}
 
-		return (string) $this->value->id;
+		else {
+			return "null";
+		}
 	}
 
 	public function _sqlCriteria(array $subcriteria, array $arguments) {
-		$model           =& $this->referenceModel;
-		$modelTableName  =  $model->_getSQLTableName();
-		$wantedFieldName =  $subcriteria[0];
-		$fieldObjectName =  $wantedFieldName.Model::FIELD_OBJECT_SUFFIX;
+		$model           = $this->getReferenceModel();
+		$modelTableName  = $model->_getSQLTableName();
+		$wantedFieldName = $subcriteria[0];
+		$fieldObjectName = $wantedFieldName.Model::FIELD_OBJECT_SUFFIX;
 
 		// the foreign key is targeted to the model itself. Do a id-to-id comparison
 		if (count($subcriteria) < 2) {
@@ -602,5 +599,9 @@ class ManyToOneField extends Field {
 			// activate the normal 'not found' message
 			$model->$wantedFieldName;
 		}
+	}
+
+	private function getReferenceModel() {
+		return new $this->referenceModelClass();
 	}
 }
