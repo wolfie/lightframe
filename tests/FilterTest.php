@@ -37,8 +37,8 @@ class FilterTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('alt', lf_filter_default(0, 'alt'), 'Zero integer should trigger the alternative text');
 		$this->assertEquals('alt', lf_filter_default(0.0, 'alt'), 'Zero float should trigger the alternative text');
 		$this->assertEquals('alt', lf_filter_default(null, 'alt'), 'Null should trigger the alternative text');
-		$this->assertEquals('alt', lf_filter_default(array(), 'alt'), 'Empty array should trigger the alternative text');
-		$this->assertEquals('alt', lf_filter_default(array("not_empty"), 'alt'), 'Non-empty array should _not_ trigger the alternative text');
+		$this->assertNotEquals('alt', lf_filter_default(array(), 'alt'), 'Empty array should _not_ trigger the alternative text');
+		$this->assertNotEquals('alt', lf_filter_default(array("not_empty"), 'alt'), 'Non-empty array should _not_ trigger the alternative text');
 	}
 
 	public function provider() {
