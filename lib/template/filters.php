@@ -72,7 +72,7 @@ function lf_filter_capitalisefirst($string, $arg) {
  * @return string
  */
 function lf_filter_default($string, $arg) {
-	if (!$string)
+	if (!(string)$string)
 		return $arg;
 	else
 		return $string;
