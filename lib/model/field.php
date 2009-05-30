@@ -526,20 +526,25 @@ class ManyToOneField extends Field {
 
 	public function inflate() {
 		$value = (int)$this->value;
-		$this->value = $this->getReferenceModel();
-		$this->value->load($value);
 
-		if ($this->value->id === $value) {
-			$this->inflated = true;
+		if ($value) {
+			$this->value = $this->getReferenceModel();
+			$this->value->load($value);
+
+			if ($this->value->id === $value) {
+				$this->inflated = true;
+			} else {
+				// reset the value
+				$this->value = $value;
+				$this->inflated = false;
+
+				throw new LightFrameException('Could not inflate '.
+					get_class($this).'(\''.
+					$this->referenceModelClass.'\') with id '.$value
+				);
+			}
 		} else {
-			// reset the value
-			$this->value = $value;
-			$this->inflated = false;
-
-			throw new LightFrameException('Could not inflate '.
-				get_class($this).'(\''.
-				$this->referenceModelClass.'\') with id '.$value
-			);
+			$value = null;
 		}
 	}
 
