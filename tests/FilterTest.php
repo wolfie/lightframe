@@ -41,6 +41,18 @@ class FilterTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEquals('alt', lf_filter_default(array("not_empty"), 'alt'), 'Non-empty array should _not_ trigger the alternative text');
 	}
 
+	public function testSafe() {
+		$this->assertEquals("<div></div>", lf_filter_safe("&lt;div&gt;&lt;/div&gt;", null));
+	}
+
+	public function testSpacesToUnderscores() {
+		$this->assertEquals("_foo_bar_", lf_filter_spaces_to_underscores(" foo bar ",null));
+	}
+
+	public function testUnderscoresToSpaces() {
+		$this->assertEquals(" foo bar ", lf_filter_underscores_to_spaces("_foo_bar_",null));
+	}
+
 	public function provider() {
 		return array(
 			"foo bar",
