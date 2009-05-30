@@ -64,7 +64,7 @@ abstract class Model {
 		if ($value instanceof Field) {
 			if (!isset($this->_fields[$name])) {
 				$this->_fields[$name] = $value;
-				$this->_fields[$name]->_setName(SQL::toSysId($this->_getSQLTableName()).'.'.SQL::toSysId($name));
+				$this->_fields[$name]->_setName(SQL::toSysId($this->getSQLTableName()).'.'.SQL::toSysId($name));
 			} else {
 				throw new UnexpectedValueException($name.' is already given a Field type.');
 			}
@@ -175,7 +175,7 @@ abstract class Model {
 
 			$query =
 				'INSERT INTO '.
-				SQL::toSysId($this->_getSQLTableName()).
+				SQL::toSysId($this->getSQLTableName()).
 				' ('.implode(',',array_keys($insertData)).') '.
 				'VALUES ('.implode(',',$insertData).')';
 
@@ -190,7 +190,7 @@ abstract class Model {
 				}
 			}
 
-			$query  = 'UPDATE '.$this->_getSQLTableName();
+			$query  = 'UPDATE '.$this->getSQLTableName();
 			$query .= ' SET '.implode(', ',$updateData);
 			$query .=' WHERE id = '.$this->id;
 
@@ -217,7 +217,7 @@ abstract class Model {
 		$sql = new SQL();
 
 		$query = 'SELECT * FROM '.
-		SQL::toSysId($this->_getSQLTableName()).
+		SQL::toSysId($this->getSQLTableName()).
 			' WHERE id = '.$id.' LIMIT 1';
 
 		$result = $sql->query($query);
@@ -278,7 +278,7 @@ abstract class Model {
 			$this->_retrieved = true;
 
 			if ($oldId === -1) {
-				$this->id = $sql->getLastID($this->_getSQLTableName());
+				$this->id = $sql->getLastID($this->getSQLTableName());
 			}
 
 			foreach ($this->_fields as $field) {
@@ -316,7 +316,7 @@ abstract class Model {
 				&& $this->id >= 0 ) {
 
 			$sql = new SQL();
-			$sql->query('DELETE FROM '.$this->_getSQLTableName().' WHERE id = '.$this->id);
+			$sql->query('DELETE FROM '.$this->getSQLTableName().' WHERE id = '.$this->id);
 		}
 		
 		$this->clear();
@@ -335,7 +335,7 @@ abstract class Model {
 	 *
 	 * @return string
 	 */
-	final public function _getSQLTableName() {
+	public function getSQLTableName() {
 		// Use the cached table name
 		if ($this->_cachedTableName != null) {
 			return $this->_cachedTableName;
