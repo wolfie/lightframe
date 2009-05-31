@@ -61,7 +61,10 @@ abstract class Model {
 	 * @param mixed $value
 	 */
 	final public function __set($name, $value) {
-		if ($value instanceof Field) {
+		if ($name === 'id') {
+			throw new ReadOnlyException('Model::id cannot be written');
+		}
+		elseif ($value instanceof Field) {
 			if (!isset($this->_fields[$name])) {
 				$this->_fields[$name] = $value;
 				$this->_fields[$name]->_setName(SQL::toSysId($this->getSQLTableName()).'.'.SQL::toSysId($name));
