@@ -1,5 +1,6 @@
 <?php
 require_once 'testdata/TestModel.php';
+require_once 'testdata/NullModel.php';
 require_once '../lib/exceptions.php';
 require_once 'settings.php';
 
@@ -18,6 +19,27 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 	protected function tearDown() {
 		unset($this->testModel);
 		unlink("sqlite.db");
+	}
+
+	public function testingModelCreation() {
+		$model = new NullModel();
+
+		try {
+			$model->field;
+			$this->fail("field should not be accessible before it's explicitly defined.");
+		} catch (LightFrameException $e) {
+			// Expected behavior.
+		}
+
+		$model->field = new TextField();
+		$model->field;
+
+		try {
+			$model->field = new TextField();
+			$this->fail('field shouldn\'t be redefineable.');
+		} catch (UnexpectedValueException $e) {
+			// Expected behavior.
+		}
 	}
 
 	public function testExistingFieldsAccessibility() {
