@@ -13,7 +13,12 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 		$this->testModel = new TestModel();
 		file_put_contents("sqlite.db", "");
 		$pdo = new PDO('sqlite:sqlite.db');
-		$pdo->query("CREATE TABLE ".$this->testModel->getSQLTableName()." text, int, manyToOne");
+		$pdo->query("CREATE TABLE \"".$this->testModel->getSQLTableName()."\" (id, text, int, manyToOne)");
+		if ($pdo->errorCode() !== "00000") {
+			echo "DB FAIL";
+			var_dump($pdo->errorInfo());
+			$this->fail();
+		}
 	}
 
 	protected function tearDown() {
