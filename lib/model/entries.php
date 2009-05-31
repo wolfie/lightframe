@@ -27,7 +27,7 @@
  * @see Entries::KEEP_KEYWORD
  * @see Entries::DISCARD_KEYWORD
  */
-class Entries implements ArrayAccess, Iterator, Countable {
+class Entries implements ArrayAccess, SeekableIterator, Countable {
 	/**
 	 * The Entries' model name as a string
 	 * @var string
@@ -285,6 +285,23 @@ class Entries implements ArrayAccess, Iterator, Countable {
 	public function rewind() {
 		$this->iteratorPointer = 0;
 		return $this->current();
+	}
+
+	/**
+	 * SeekableIterator::seek($index)
+	 *
+	 * @param int $index
+	 */
+	public function seek($index) {
+		if (is_integer($index)) {
+			if ($index >= 0 && $index < $this->count()) {
+				$this->iteratorPointer = $index;
+			} else {
+				throw new OutOfBoundsException($index.' is not a valid seek position.', null);
+			}
+		} else {
+			throw new InvalidArgumentException(get_class().'::seek($index) requires an integer argument', null);
+		}
 	}
 
 }
