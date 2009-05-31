@@ -329,7 +329,7 @@ class IntField extends NumberField {
 	}
 
 	public function deflate() {
-		return (string) $this->value;
+		return (string) (int) $this->value;
 	}
 
 	public function valueIsValidSQL($value) {
