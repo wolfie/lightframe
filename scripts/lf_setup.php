@@ -79,8 +79,6 @@ function setup_help($arg) {
 		echo
 		'To get more info about a particular command, use "help <command>" as an argument.'.PHP_EOL.PHP_EOL.
 		'startproject'.PHP_EOL.
-		'scanserver'.PHP_EOL.
-		'createdb'.PHP_EOL.
 		PHP_EOL;
 	}
 	elseif (function_exists('setup_'.$arg)) {
@@ -99,20 +97,13 @@ function setup_startproject($arg) {
 	if ($arg === DISPLAY_HELP) {
 		echo
 		WHITE.'startproject: '.OFF.'copy template files needed for a new LightFrame project'.PHP_EOL.
-		'usage: '.WHITE.'startproject'.OFF.' [PATH]'.PHP_EOL.
-		PHP_EOL.
-		wordwrap('if PATH is provided, the files will be copied to that path. Otherwise they are copied to the current working path'.PHP_EOL).
+		'usage: '.WHITE.'startproject'.OFF.PHP_EOL.
 		PHP_EOL;
 		die();
 	}
-
-	if (!$arg) {
-		$path = getcwd();
-	}
-	else {
-		$path = $arg;
-	}
-
+	
+	$path = getcwd();
+	
 	$templatepath = dirname(__FILE__).'/projectfiles';
 	if (!is_dir($templatepath)) {
 		die('"'.$templatepath.'" is not a directory'.PHP_EOL);
@@ -125,132 +116,6 @@ function setup_startproject($arg) {
 	$createdir = $path.'/templates'; echo 'creating directory '.$createdir.PHP_EOL; mkdir($createdir);
 
 	echo PHP_EOL.'new project created!'.PHP_EOL.PHP_EOL;
-}
-
-function setup_scanserver($arg) {
-	if ($arg === DISPLAY_HELP) {
-		echo 'meh'.PHP_EOL.PHP_EOL;
-		die();
-	}
-
-	// I'm checking for everything atm. Take out everything that's not supported!
-	$features = array(
-		'SQL' => array(
-			'MySQL          (mysql) ' => function_exists('mysql_connect'),
-			'MySQL Improved (mysqli)' => function_exists('mysqli_connect'),
-			'MySQL Improved ()      ' => class_exists('mysqli'),
-			'PostgreSQL     (pgsql) ' => function_exists('pg_connect'),
-			'SQLite         (sqlite)' => function_exists('sqlite_open'),
-			'SQLite         ()      ' => class_exists('SQLiteDatabase'),
-			'PDO            ()      ' => class_exists('PDO')
-		),
-		'Compression' => array(
-			'ZIP   ()' => function_exists('zip_open'),
-			'ZIP   ()' => class_exists('ZipArchive'),
-			'GZip  ()' => function_exists('gzopen'),
-			'BZip2 ()' => function_exists('bzopen'),
-			'RAR   ()' => function_exists('rar_open')
-		),
-		'Image Manipulation' => array (
-			'ImageMagick ()' => class_exists('Imagick'),
-			'GDLib       ()' => function_exists('imagecreate')
-		)
-	);
-
-	foreach ($features as $group => $featureset) {
-		echo $group.':'.PHP_EOL;
-		foreach ($featureset as $setting => $status) {
-			echo '  '.$setting.': ' . ($status ? 'yes' : 'no') . PHP_EOL;
-		}
-		echo PHP_EOL;
-	}
-
-	if (!in_array(true, $features['SQL'])) {
-		echo 'The server does not have a supported database engine. LightFrame functionality will be very limited.'.PHP_EOL;
-	}
-
-	echo PHP_EOL;
-}
-
-function setup_createdb($settingsFile) {
-	require_once(dirname(__FILE__).'/../lib/model/model.php');
-	require_once(dirname(__FILE__).'/../lib/exceptions.php');
-
-	if (!$settingsFile) {
-		$settingsFile = './settings.php';
-	}
-
-	if(!is_readable($settingsFile) || !is_file($settingsFile)) {
-		trigger_error($settingsFile .'is not a readable file');
-	}
-
-	require_once($settingsFile);
-
-	$files = _createdb_findmodelfiles(LF_APPS_PATH);
-
-	echo WHITE.'Found following model files:'.PHP_EOL.OFF;
-	if (count($files) === 0) {
-		die('no model files found'.PHP_EOL);
-	}
-	else foreach ($files as $file) {
-		echo $file.PHP_EOL;
-		require $file;
-	}
-	echo PHP_EOL;
-
-	$models = _createdb_findmodels($files);
-	$sql = array();
-	echo WHITE.'Found following models:'.PHP_EOL.OFF;
-	if (count($models) === 0) {
-		die ('no models found'.PHP_EOL);
-	}
-	else foreach ($models as $model) {
-		echo $model.PHP_EOL;
-		$model = new $model();
-		$sql[] = $model->_getSQLCreateTable();
-	}
-	echo PHP_EOL;
-
-	$db = new SQL();
-	echo WHITE.'Running following queries:'.PHP_EOL.OFF;
-	foreach ($sql as $query) {
-		echo $query.PHP_EOL;
-		$db->query($query);
-	}
-
-	echo WHITE.PHP_EOL.'ok'.PHP_EOL.OFF;
-}
-
-
-// Auxiliary functions
-
-function _createdb_findmodelfiles($dir) {
-	$files = array();
-
-	foreach (glob($dir.'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $d) {
-		$files = _createdb_findmodelfiles($d);
-	}
-
-	if (file_exists($dir.'/models.php')) {
-		$files[] = $dir.'/models.php';
-	}
-
-	return $files;
-}
-
-function _createdb_findmodels($files) {
-	$models = array();
-
-	foreach ($files as $file) {
-		$contents = file($file);
-		foreach ($contents as $line) {
-			if (preg_match('/class (?P<model>[^ ]+) extends Model/U',$line,$matches)) {
-				 $models[] = $matches['model'];
-			}
-		}
-	}
-
-	return $models;
 }
 
 function _startproject_findfilesfrom($path) {
