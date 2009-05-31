@@ -69,6 +69,18 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($this->testModel->text, $this->testModel->text__value);
 	}
 
+	public function testIdfield() {
+		$this->assertType('int', $this->testModel->id);
+		$this->assertEquals(-1, $this->testModel->id);
+
+		try {
+			$this->testModel->id = 1;
+			$this->fail('Model::id shouldn\'t be writeable');
+		} catch (ReadOnlyException $e) {
+			// Expected behavior
+		}
+	}
+
 	public function testIntField() {
 		$this->assertType('int', $this->testModel->int);
 		$this->assertNotType('object', $this->testModel->int);
@@ -116,5 +128,37 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 
 //		$this->assertTrue(is_object($this->testModel->manyToOne));
 //		$this->assertTrue($this->testModel->manyToOne instanceof Model);
+	}
+
+	public function testModelSave() {
+		try {
+			$this->testModel->merge();
+			$this->fail("Uninitiated models shouldn't be able to be merged");
+		} catch (LightFrameException $e) {
+			// Desired behavior
+		}
+
+		$this->testModel->save();
+		$this->assertNotEquals(-1, $this->testModel->id);
+	}
+
+	public function testModelSaveInt() {
+		$oldInt = $this->testModel->int;
+		$int = (int) round(rand(-1*PHP_INT_MAX, PHP_INT_MAX));
+
+		$this->testModel->save();
+		
+		$this->testModel->int = $int;
+		$this->assertEquals($int, $this->testModel->int);
+
+		$this->testModel->merge();
+		$this->assertNotEquals($oldInt, $this->testModel->int);
+
+		$this->testModel->int = $int;
+		$this->testModel->save();
+		$this->assertEquals($int, $this->testModel->int);
+
+		$this->testModel->merge();
+		$this->assertEquals($int, $this->testModel->int);
 	}
 }
