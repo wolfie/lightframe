@@ -302,6 +302,8 @@ abstract class Model {
 	final public function merge() {
 		if (is_int($this->id) && $this->id >= 0) {
 			$this->load($this->id);
+		} else {
+			throw new LightFrameException('Can\'t merge a Model without an id');
 		}
 	}
 
