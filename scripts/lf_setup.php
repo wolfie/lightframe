@@ -120,6 +120,9 @@ function setup_startproject($arg) {
 	
 	chdir($templatepath);
 	_startproject_install(_startproject_findfilesfrom('./'), $path);
+
+	$createdir = $path.'/apps';      echo 'creating directory '.$createdir.PHP_EOL; mkdir($createdir);
+	$createdir = $path.'/templates'; echo 'creating directory '.$createdir.PHP_EOL; mkdir($createdir);
 	
 	echo PHP_EOL.'new project created!'.PHP_EOL.PHP_EOL;
 }
@@ -293,4 +296,6 @@ function _startproject_install($filelist, $destination) {
 			copy($file, $destination.'/'.basename($file));
 		}
 	}
+
+
 }
