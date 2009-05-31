@@ -386,7 +386,7 @@ abstract class Model {
 
 	/**
 	 * Get an unique prefix for the table name. This enables the user to install
-	 * several LightFrame projects inside on database.
+	 * several LightFrame projects inside one database.
 	 *
 	 * @return string
 	 */
